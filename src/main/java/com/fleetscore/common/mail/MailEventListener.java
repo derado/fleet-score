@@ -2,6 +2,7 @@ package com.fleetscore.common.mail;
 
 import com.fleetscore.common.events.InvitationEmailRequested;
 import com.fleetscore.common.events.VerificationEmailRequested;
+import com.fleetscore.common.events.PasswordResetEmailRequested;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -24,5 +25,11 @@ public class MailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onInvitation(InvitationEmailRequested event) {
         mailService.sendInvitationEmail(event.email(), event.token());
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onPasswordReset(PasswordResetEmailRequested event) {
+        mailService.sendPasswordResetEmail(event.email(), event.token());
     }
 }

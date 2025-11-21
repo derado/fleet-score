@@ -40,6 +40,8 @@ public class SecurityConfig {
                         "/api/auth/register",
                         "/api/auth/verify",
                         "/api/auth/accept-invitation",
+                        "/api/auth/forgot-password",
+                        "/api/auth/reset-password",
                         "/api/auth/login",
                         "/api/auth/refresh",
                         "/api/auth/logout",

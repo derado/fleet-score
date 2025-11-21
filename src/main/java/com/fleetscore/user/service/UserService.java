@@ -7,6 +7,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.fleetscore.common.events.InvitationEmailRequested;
 import com.fleetscore.common.events.VerificationEmailRequested;
+import com.fleetscore.common.events.PasswordResetEmailRequested;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,12 +28,16 @@ public class UserService {
     private final UserAccountRepository userRepository;
     private final VerificationTokenRepository tokenRepository;
     private final InvitationRepository invitationRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher events;
 
     
 
     private static final SecureRandom RANDOM = new SecureRandom();
+
+    @Value("${app.auth.reset-ttl-min:30}")
+    private int resetTtlMinutes;
 
     @Transactional
     public String registerAndCreateOrganisation(RegistrationRequest req) {
@@ -59,7 +65,7 @@ public class UserService {
         ver.setUser(user);
         ver.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
         tokenRepository.save(ver);
-        // publish verification email event (handled asynchronously after commit)
+
         events.publishEvent(new VerificationEmailRequested(user.getEmail(), token));
         return token;
     }
@@ -99,7 +105,7 @@ public class UserService {
         inv.setRoles(roles);
         inv.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
         invitationRepository.save(inv);
-        // publish invitation email event (handled asynchronously after commit)
+
         events.publishEvent(new InvitationEmailRequested(email, token));
         return token;
     }
@@ -126,6 +132,37 @@ public class UserService {
         userRepository.save(user);
         inv.setUsedAt(Instant.now());
         invitationRepository.save(inv);
+    }
+
+    @Transactional
+    public void requestPasswordReset(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String token = generateToken();
+            PasswordResetToken prt = new PasswordResetToken();
+            prt.setToken(token);
+            prt.setUser(user);
+            prt.setExpiresAt(Instant.now().plus(resetTtlMinutes, ChronoUnit.MINUTES));
+            passwordResetTokenRepository.save(prt);
+
+            events.publishEvent(new PasswordResetEmailRequested(user.getEmail(), token));
+        });
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken prt = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new EntityNotFoundException("Invalid password reset token"));
+        if (prt.isUsed()) {
+            throw new IllegalStateException("Token already used");
+        }
+        if (prt.isExpired()) {
+            throw new IllegalStateException("Token expired");
+        }
+        UserAccount user = prt.getUser();
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        prt.setUsedAt(Instant.now());
+        passwordResetTokenRepository.save(prt);
     }
 
     private String generateToken() {

@@ -5,6 +5,8 @@ import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.api.dto.MeResponse;
 import com.fleetscore.user.api.dto.LoginRequest;
 import com.fleetscore.user.api.dto.TokenResponse;
+import com.fleetscore.user.api.dto.ForgotPasswordRequest;
+import com.fleetscore.user.api.dto.ResetPasswordRequest;
 import com.fleetscore.common.api.ApiResponse;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.UserAccountRepository;
@@ -56,6 +58,26 @@ public class AuthController {
                                                              HttpServletRequest httpRequest) {
         userService.acceptInvitation(req.token(), req.password());
         ApiResponse<Void> resp = ApiResponse.ok("Invitation accepted", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        return ResponseEntity.ok(resp);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req,
+                                                            HttpServletRequest httpRequest) {
+        userService.requestPasswordReset(req.email());
+        ApiResponse<Void> resp = ApiResponse.ok(
+                "If an account exists for this email, a password reset email has been sent.",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(resp);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest req,
+                                                           HttpServletRequest httpRequest) {
+        userService.resetPassword(req.token(), req.password());
+        ApiResponse<Void> resp = ApiResponse.ok("Password reset successful", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
 

@@ -17,4 +17,9 @@ public class NoopMailService implements MailService {
     public void sendInvitationEmail(String to, String token) {
         log.info("[NOOP MAIL] Invitation email to={} token={}", to, token);
     }
+
+    @Override
+    public void sendPasswordResetEmail(String to, String token) {
+        log.info("[NOOP MAIL] Password reset email to={} token={}", to, token);
+    }
 }

@@ -41,6 +41,19 @@ public class SmtpMailService implements MailService {
         send(to, subject, text);
     }
 
+    @Override
+    public void sendPasswordResetEmail(String to, String token) {
+        String subject = "Reset your FleetScore password";
+        String resetLink = baseUrl + "/reset-password?token=" + token;
+        String text = "We received a request to reset your FleetScore password.\n\n" +
+                "If you made this request, you can reset your password using the token below, or by visiting:" +
+                "\n" + resetLink + "\n\n" +
+                "Token: " + token + "\n\n" +
+                "API endpoint: POST /api/auth/reset-password { token, password }\n\n" +
+                "If you didn't request a password reset, you can ignore this email.";
+        send(to, subject, text);
+    }
+
     private void send(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
