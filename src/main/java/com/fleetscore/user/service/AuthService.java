@@ -59,8 +59,7 @@ public class AuthService {
         UserAccount user = users.findByEmail(request.email()).orElseThrow();
         String access = tokenService.generateAccessToken(
                 user.getEmail(),
-                user.getId(),
-                user.getRoles().stream().map(Enum::name).toList()
+                user.getId()
         );
         Instant accessExp = tokenService.getExpiryFromNow();
 
@@ -104,8 +103,7 @@ public class AuthService {
         // new access token
         String access = tokenService.generateAccessToken(
                 user.getEmail(),
-                user.getId(),
-                user.getRoles().stream().map(Enum::name).toList()
+                user.getId()
         );
         Instant accessExp = tokenService.getExpiryFromNow();
 

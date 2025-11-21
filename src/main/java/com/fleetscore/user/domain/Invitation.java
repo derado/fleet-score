@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "invitations", indexes = {
@@ -32,17 +30,6 @@ public class Invitation {
 
     @Column(nullable = false, length = 320)
     private String email;
-
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "organisation_id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_invitation_org"))
-    private Organisation organisation;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "invitation_roles", joinColumns = @JoinColumn(name = "invitation_id"))
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 30, nullable = false)
-    private Set<Role> roles = EnumSet.noneOf(Role.class);
 
     @Column(nullable = false)
     private Instant expiresAt;

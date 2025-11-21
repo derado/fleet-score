@@ -18,7 +18,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -80,12 +79,9 @@ public class UserService {
     }
 
     @Transactional
-    public String createInvitation(String email, Set<Role> roles, Long adminUserId) {
-        UserAccount admin = userRepository.findById(adminUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Admin user not found"));
-        if (!admin.getRoles().contains(Role.ADMIN)) {
-            throw new IllegalStateException("Only ADMIN can invite users");
-        }
+    public String createInvitation(String email, Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Requesting user not found"));
         if (userRepository.existsByEmail(email)) {
             throw new IllegalStateException("User with email already exists");
         }
@@ -93,7 +89,6 @@ public class UserService {
         Invitation inv = new Invitation();
         inv.setToken(token);
         inv.setEmail(email);
-        inv.setRoles(roles);
         inv.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
         invitationRepository.save(inv);
 
@@ -118,7 +113,6 @@ public class UserService {
         user.setEmail(inv.getEmail());
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setEmailVerified(true);
-        user.setRoles(inv.getRoles());
         userRepository.save(user);
         inv.setUsedAt(Instant.now());
         invitationRepository.save(inv);

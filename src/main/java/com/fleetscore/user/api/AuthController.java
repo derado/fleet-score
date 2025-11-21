@@ -22,7 +22,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -111,14 +110,13 @@ public class AuthController {
                                                       Authentication authentication,
                                                       HttpServletRequest httpRequest) {
         if (authentication == null || !authentication.isAuthenticated() || email == null) {
-            MeResponse data = new MeResponse(false, null, null, null);
+            MeResponse data = new MeResponse(false, null, null);
             ApiResponse<MeResponse> body = ApiResponse.ok(data, "Anonymous", HttpStatus.OK.value(), httpRequest.getRequestURI());
             return ResponseEntity.ok(body);
         }
         UserAccount ua = users.findByEmail(email).orElse(null);
-        List<String> roles = authentication.getAuthorities().stream().map(a -> a.getAuthority()).toList();
         Boolean verified = ua != null ? ua.isEmailVerified() : null;
-        MeResponse data = new MeResponse(true, email, roles, verified);
+        MeResponse data = new MeResponse(true, email, verified);
         ApiResponse<MeResponse> body = ApiResponse.ok(data, "Current user", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }

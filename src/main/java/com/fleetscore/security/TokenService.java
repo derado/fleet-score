@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 @Service
 public class TokenService {
@@ -27,7 +26,7 @@ public class TokenService {
         this.encoder = encoder;
     }
 
-    public String generateAccessToken(String email, Long userId, List<String> roles) {
+    public String generateAccessToken(String email, Long userId) {
         Instant now = Instant.now();
         Instant exp = now.plus(accessTtlMinutes, ChronoUnit.MINUTES);
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -37,7 +36,6 @@ public class TokenService {
                 .subject(email)
                 .claim("uid", userId)
                 .claim("email", email)
-                .claim("roles", roles)
                 .build();
         JwsHeader jws = JwsHeader.with(MacAlgorithm.HS256).build();
         return encoder.encode(JwtEncoderParameters.from(jws, claims)).getTokenValue();
