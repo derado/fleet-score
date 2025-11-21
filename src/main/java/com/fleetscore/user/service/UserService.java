@@ -8,16 +8,15 @@ import lombok.RequiredArgsConstructor;
 import com.fleetscore.common.events.InvitationEmailRequested;
 import com.fleetscore.common.events.VerificationEmailRequested;
 import com.fleetscore.common.events.PasswordResetEmailRequested;
+import com.fleetscore.common.util.TokenGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +28,9 @@ public class UserService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher events;
+    private final TokenGenerator tokenGenerator;
 
     
-
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Value("${app.auth.reset-ttl-min:30}")
     private int resetTtlMinutes;
@@ -50,7 +48,7 @@ public class UserService {
         user.setEmailVerified(false);
         userRepository.save(user);
 
-        String token = generateToken();
+        String token = tokenGenerator.generateHexToken(24);
         VerificationToken ver = new VerificationToken();
         ver.setToken(token);
         ver.setUser(user);
@@ -85,7 +83,7 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalStateException("User with email already exists");
         }
-        String token = generateToken();
+        String token = tokenGenerator.generateHexToken(24);
         Invitation inv = new Invitation();
         inv.setToken(token);
         inv.setEmail(email);
@@ -121,7 +119,7 @@ public class UserService {
     @Transactional
     public void requestPasswordReset(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
-            String token = generateToken();
+            String token = tokenGenerator.generateHexToken(24);
             PasswordResetToken prt = new PasswordResetToken();
             prt.setToken(token);
             prt.setUser(user);
@@ -149,9 +147,19 @@ public class UserService {
         passwordResetTokenRepository.save(prt);
     }
 
-    private String generateToken() {
-        byte[] bytes = new byte[24];
-        RANDOM.nextBytes(bytes);
-        return HexFormat.of().withUpperCase().formatHex(bytes);
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isEmailVerified()) {
+                return; // no-op if already verified
+            }
+            String token = tokenGenerator.generateHexToken(24);
+            VerificationToken ver = new VerificationToken();
+            ver.setToken(token);
+            ver.setUser(user);
+            ver.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
+            tokenRepository.save(ver);
+            events.publishEvent(new VerificationEmailRequested(user.getEmail(), token));
+        });
     }
 }

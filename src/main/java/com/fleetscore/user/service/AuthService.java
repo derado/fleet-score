@@ -7,6 +7,7 @@ import com.fleetscore.user.domain.RefreshToken;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.RefreshTokenRepository;
 import com.fleetscore.user.repository.UserAccountRepository;
+import com.fleetscore.common.util.TokenGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +32,7 @@ public class AuthService {
     private final UserAccountRepository users;
     private final RefreshTokenRepository refreshTokens;
     private final TokenService tokenService;
+    private final TokenGenerator tokenGenerator;
 
     @Value("${app.auth.jwt.refresh-ttl-days:7}")
     private int refreshTtlDays;
@@ -49,8 +49,6 @@ public class AuthService {
     @Value("${app.auth.refresh.cookie-domain:}")
     private String cookieDomain;
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-
     @Transactional
     public TokenResponse login(LoginRequest request, HttpServletResponse response) {
         Authentication auth = authenticationManager.authenticate(
@@ -64,7 +62,7 @@ public class AuthService {
         Instant accessExp = tokenService.getExpiryFromNow();
 
         // issue refresh token
-        String rt = generateToken();
+        String rt = tokenGenerator.generateHexToken(48);
         Instant rtExp = Instant.now().plus(refreshTtlDays, ChronoUnit.DAYS);
         RefreshToken refresh = new RefreshToken();
         refresh.setToken(rt);
@@ -92,7 +90,7 @@ public class AuthService {
         // rotate
         token.setRevoked(true);
         refreshTokens.save(token);
-        String newRt = generateToken();
+        String newRt = tokenGenerator.generateHexToken(48);
         Instant newRtExp = Instant.now().plus(refreshTtlDays, ChronoUnit.DAYS);
         RefreshToken newToken = new RefreshToken();
         newToken.setToken(newRt);
@@ -146,9 +144,4 @@ public class AuthService {
                 .findFirst().orElse(null);
     }
 
-    private String generateToken() {
-        byte[] bytes = new byte[48];
-        RANDOM.nextBytes(bytes);
-        return HexFormat.of().withUpperCase().formatHex(bytes);
-    }
 }

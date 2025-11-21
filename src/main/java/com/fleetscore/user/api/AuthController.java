@@ -7,6 +7,7 @@ import com.fleetscore.user.api.dto.LoginRequest;
 import com.fleetscore.user.api.dto.TokenResponse;
 import com.fleetscore.user.api.dto.ForgotPasswordRequest;
 import com.fleetscore.user.api.dto.ResetPasswordRequest;
+import com.fleetscore.user.api.dto.ResendVerificationRequest;
 import com.fleetscore.common.api.ApiResponse;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.UserAccountRepository;
@@ -49,6 +50,14 @@ public class AuthController {
                                                     HttpServletRequest httpRequest) {
         userService.verifyEmail(token);
         ApiResponse<Void> resp = ApiResponse.ok("Email verified. You can now log in.", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        return ResponseEntity.ok(resp);
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(@Valid @RequestBody ResendVerificationRequest req,
+                                                                HttpServletRequest httpRequest) {
+        userService.resendVerificationEmail(req.email());
+        ApiResponse<Void> resp = ApiResponse.ok("If the email is registered and not verified, a new verification email has been sent.", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
 
@@ -110,13 +119,15 @@ public class AuthController {
                                                       Authentication authentication,
                                                       HttpServletRequest httpRequest) {
         if (authentication == null || !authentication.isAuthenticated() || email == null) {
-            MeResponse data = new MeResponse(false, null, null);
+            MeResponse data = new MeResponse(false, null, null, null, null);
             ApiResponse<MeResponse> body = ApiResponse.ok(data, "Anonymous", HttpStatus.OK.value(), httpRequest.getRequestURI());
             return ResponseEntity.ok(body);
         }
         UserAccount ua = users.findByEmail(email).orElse(null);
         Boolean verified = ua != null ? ua.isEmailVerified() : null;
-        MeResponse data = new MeResponse(true, email, verified);
+        String firstName = ua != null ? ua.getFirstName() : null;
+        String lastName = ua != null ? ua.getLastName() : null;
+        MeResponse data = new MeResponse(true, email, firstName, lastName, verified);
         ApiResponse<MeResponse> body = ApiResponse.ok(data, "Current user", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
