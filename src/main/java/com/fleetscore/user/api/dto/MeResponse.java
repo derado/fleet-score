@@ -6,6 +6,5 @@ public record MeResponse(
         boolean authenticated,
         String email,
         List<String> roles,
-        Boolean emailVerified,
-        Long organisationId
+        Boolean emailVerified
 ) {}

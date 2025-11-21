@@ -33,8 +33,8 @@ public class Invitation {
     @Column(nullable = false, length = 320)
     private String email;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "organisation_id", nullable = false,
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "organisation_id", nullable = true,
             foreignKey = @ForeignKey(name = "fk_invitation_org"))
     private Organisation organisation;
 

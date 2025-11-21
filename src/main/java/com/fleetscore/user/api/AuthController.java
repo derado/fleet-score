@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegistrationRequest request,
                                                       HttpServletRequest httpRequest) {
-        userService.registerAndCreateOrganisation(request);
+        userService.registerUser(request);
         ApiResponse<Void> body = ApiResponse.ok(
                 "Registration successful. Verification email sent.",
                 HttpStatus.CREATED.value(),
@@ -111,15 +111,14 @@ public class AuthController {
                                                       Authentication authentication,
                                                       HttpServletRequest httpRequest) {
         if (authentication == null || !authentication.isAuthenticated() || email == null) {
-            MeResponse data = new MeResponse(false, null, null, null, null);
+            MeResponse data = new MeResponse(false, null, null, null);
             ApiResponse<MeResponse> body = ApiResponse.ok(data, "Anonymous", HttpStatus.OK.value(), httpRequest.getRequestURI());
             return ResponseEntity.ok(body);
         }
         UserAccount ua = users.findByEmail(email).orElse(null);
         List<String> roles = authentication.getAuthorities().stream().map(a -> a.getAuthority()).toList();
         Boolean verified = ua != null ? ua.isEmailVerified() : null;
-        Long orgId = ua != null && ua.getOrganisation() != null ? ua.getOrganisation().getId() : null;
-        MeResponse data = new MeResponse(true, email, roles, verified, orgId);
+        MeResponse data = new MeResponse(true, email, roles, verified);
         ApiResponse<MeResponse> body = ApiResponse.ok(data, "Current user", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }

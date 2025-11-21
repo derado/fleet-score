@@ -24,7 +24,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final OrganisationRepository organisationRepository;
     private final UserAccountRepository userRepository;
     private final VerificationTokenRepository tokenRepository;
     private final InvitationRepository invitationRepository;
@@ -40,23 +39,16 @@ public class UserService {
     private int resetTtlMinutes;
 
     @Transactional
-    public String registerAndCreateOrganisation(RegistrationRequest req) {
+    public String registerUser(RegistrationRequest req) {
         if (userRepository.existsByEmail(req.email())) {
             throw new IllegalStateException("Email already in use");
         }
-        if (organisationRepository.existsByName(req.organisationName())) {
-            throw new IllegalStateException("Organisation already exists");
-        }
-        Organisation organisation = new Organisation();
-        organisation.setName(req.organisationName());
-        organisationRepository.save(organisation);
-
         UserAccount user = new UserAccount();
         user.setEmail(req.email());
+        user.setFirstName(req.firstName());
+        user.setLastName(req.lastName());
         user.setPasswordHash(passwordEncoder.encode(req.password()));
-        user.setOrganisation(organisation);
         user.setEmailVerified(false);
-        user.addRole(Role.ADMIN);
         userRepository.save(user);
 
         String token = generateToken();
@@ -101,7 +93,6 @@ public class UserService {
         Invitation inv = new Invitation();
         inv.setToken(token);
         inv.setEmail(email);
-        inv.setOrganisation(admin.getOrganisation());
         inv.setRoles(roles);
         inv.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
         invitationRepository.save(inv);
@@ -126,7 +117,6 @@ public class UserService {
         UserAccount user = new UserAccount();
         user.setEmail(inv.getEmail());
         user.setPasswordHash(passwordEncoder.encode(password));
-        user.setOrganisation(inv.getOrganisation());
         user.setEmailVerified(true);
         user.setRoles(inv.getRoles());
         userRepository.save(user);

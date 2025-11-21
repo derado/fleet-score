@@ -27,16 +27,19 @@ public class UserAccount {
     @Column(nullable = false, length = 320)
     private String email;
 
+    @Column(nullable = true, length = 100)
+    private String firstName;
+
+    @Column(nullable = true, length = 100)
+    private String lastName;
+
     @Column(nullable = false)
     private String passwordHash;
 
     @Column(nullable = false)
     private boolean emailVerified;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "organisation_id", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_user_org"))
-    private Organisation organisation;
+    
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
