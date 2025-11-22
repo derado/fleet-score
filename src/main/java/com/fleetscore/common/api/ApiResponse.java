@@ -10,23 +10,15 @@ public record ApiResponse<T>(Instant timestamp, boolean success, int status, Str
         return new ApiResponse<>(Instant.now(), true, status, message, path, data);
     }
 
-    public static <T> ApiResponse<T> ok(T data, String message, int status) {
-        return ok(data, message, status, null);
-    }
-
-    public static ApiResponse<Void> ok(String message, int status, String path) {
-        return new ApiResponse<>(Instant.now(), true, status, message, path, null);
-    }
-
-    public static ApiResponse<Void> ok(String message, int status) {
-        return ok(message, status, null);
+    public static ApiResponse<NoContent> ok(String message, int status, String path) {
+        return new ApiResponse<>(Instant.now(), true, status, message, path, new NoContent());
     }
 
     public static <T> ApiResponse<T> error(String message, int status, String path, T data) {
         return new ApiResponse<>(Instant.now(), false, status, message, path, data);
     }
 
-    public static ApiResponse<Void> error(String message, int status, String path) {
+    public static <T> ApiResponse<T> error(String message, int status, String path) {
         return new ApiResponse<>(Instant.now(), false, status, message, path, null);
     }
 }

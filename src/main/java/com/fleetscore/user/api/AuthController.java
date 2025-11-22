@@ -1,5 +1,6 @@
 package com.fleetscore.user.api;
 
+import com.fleetscore.common.api.NoContent;
 import com.fleetscore.user.api.dto.AcceptInvitationRequest;
 import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.api.dto.MeResponse;
@@ -34,10 +35,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegistrationRequest request,
-                                                      HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<NoContent>> register(@Valid @RequestBody RegistrationRequest request,
+                                                   HttpServletRequest httpRequest) {
         userService.registerUser(request);
-        ApiResponse<Void> body = ApiResponse.ok(
+        ApiResponse<NoContent> body = ApiResponse.ok(
                 "Registration successful. Verification email sent.",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -46,34 +47,40 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse<Void>> verify(@RequestParam("token") String token,
-                                                    HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<NoContent>> verify(@RequestParam("token") String token,
+                                                 HttpServletRequest httpRequest) {
         userService.verifyEmail(token);
-        ApiResponse<Void> resp = ApiResponse.ok("Email verified. You can now log in.", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<NoContent> resp = ApiResponse.ok(
+                "Email verified. You can now log in.",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<ApiResponse<Void>> resendVerification(@Valid @RequestBody ResendVerificationRequest req,
-                                                                HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<NoContent>> resendVerification(@Valid @RequestBody ResendVerificationRequest req,
+                                                             HttpServletRequest httpRequest) {
         userService.resendVerificationEmail(req.email());
-        ApiResponse<Void> resp = ApiResponse.ok("If the email is registered and not verified, a new verification email has been sent.", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<NoContent> resp = ApiResponse.ok(
+                "If the email is registered and not verified, a new verification email has been sent.",
+                HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/accept-invitation")
-    public ResponseEntity<ApiResponse<Void>> acceptInvitation(@Valid @RequestBody AcceptInvitationRequest req,
-                                                             HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<NoContent>> acceptInvitation(@Valid @RequestBody AcceptInvitationRequest req,
+                                                          HttpServletRequest httpRequest) {
         userService.acceptInvitation(req.token(), req.password());
-        ApiResponse<Void> resp = ApiResponse.ok("Invitation accepted", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<NoContent> resp = ApiResponse.ok("Invitation accepted", HttpStatus.OK.value(),
+                httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req,
-                                                            HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<NoContent>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req,
+                                                         HttpServletRequest httpRequest) {
         userService.requestPasswordReset(req.email());
-        ApiResponse<Void> resp = ApiResponse.ok(
+        ApiResponse<NoContent> resp = ApiResponse.ok(
                 "If an account exists for this email, a password reset email has been sent.",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -82,10 +89,11 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest req,
-                                                           HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<NoContent>> resetPassword(@Valid @RequestBody ResetPasswordRequest req,
+                                                        HttpServletRequest httpRequest) {
         userService.resetPassword(req.token(), req.password());
-        ApiResponse<Void> resp = ApiResponse.ok("Password reset successful", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<NoContent> resp = ApiResponse.ok("Password reset successful", HttpStatus.OK.value(),
+                httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
 
@@ -94,7 +102,8 @@ public class AuthController {
                                                             HttpServletRequest httpRequest,
                                                             HttpServletResponse httpResponse) {
         TokenResponse tokens = authService.login(request, httpResponse);
-        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "Login successful", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "Login successful", HttpStatus.OK.value(),
+                httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
 
@@ -102,15 +111,16 @@ public class AuthController {
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(HttpServletRequest httpRequest,
                                                               HttpServletResponse httpResponse) {
         TokenResponse tokens = authService.refresh(httpRequest, httpResponse);
-        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "Token refreshed", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "Token refreshed", HttpStatus.OK.value(),
+                httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest httpRequest,
-                                                    HttpServletResponse httpResponse) {
+    public ResponseEntity<ApiResponse<NoContent>> logout(HttpServletRequest httpRequest,
+                                                 HttpServletResponse httpResponse) {
         authService.logout(httpRequest, httpResponse);
-        ApiResponse<Void> body = ApiResponse.ok("Logged out", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<NoContent> body = ApiResponse.ok("Logged out", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
 

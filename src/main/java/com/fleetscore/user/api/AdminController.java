@@ -1,5 +1,6 @@
 package com.fleetscore.user.api;
 
+import com.fleetscore.common.api.NoContent;
 import com.fleetscore.user.api.dto.InvitationRequest;
 import com.fleetscore.common.api.ApiResponse;
 import com.fleetscore.user.domain.UserAccount;
@@ -27,12 +28,12 @@ public class AdminController {
     private final UserAccountRepository users;
 
     @PostMapping("/invitations")
-    public ResponseEntity<ApiResponse<Void>> invite(@AuthenticationPrincipal UserDetails principal,
+    public ResponseEntity<ApiResponse<NoContent>> invite(@AuthenticationPrincipal UserDetails principal,
                                                     @Valid @RequestBody InvitationRequest request,
                                                     HttpServletRequest httpRequest) {
         UserAccount admin = users.findByEmail(principal.getUsername()).orElseThrow();
         userService.createInvitation(request.email(), admin.getId());
-        ApiResponse<Void> body = ApiResponse.ok(
+        ApiResponse<NoContent> body = ApiResponse.ok(
                 "Invitation email sent",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
