@@ -1,4 +1,4 @@
-package com.fleetscore.common.mail;
+package com.fleetscore.mail;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

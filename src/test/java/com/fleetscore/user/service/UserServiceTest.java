@@ -1,9 +1,9 @@
 package com.fleetscore.user.service;
 
-import com.fleetscore.common.events.PasswordResetEmailRequested;
-import com.fleetscore.common.events.VerificationEmailRequested;
 import com.fleetscore.common.util.TokenGenerator;
 import com.fleetscore.user.api.dto.RegistrationRequest;
+import com.fleetscore.user.events.PasswordResetEmailRequested;
+import com.fleetscore.user.events.VerificationEmailRequested;
 import com.fleetscore.user.domain.PasswordResetToken;
 import com.fleetscore.user.domain.Profile;
 import com.fleetscore.user.domain.UserAccount;

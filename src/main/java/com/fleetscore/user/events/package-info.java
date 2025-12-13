@@ -1,2 +1,2 @@
 @org.springframework.modulith.NamedInterface("events")
-package com.fleetscore.common.events;
+package com.fleetscore.user.events;

@@ -1,4 +1,4 @@
-package com.fleetscore.common.mail;
+package com.fleetscore.mail;
 
 public interface MailService {
     void sendVerificationEmail(String to, String token);

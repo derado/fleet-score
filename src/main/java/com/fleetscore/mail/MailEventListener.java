@@ -1,8 +1,8 @@
-package com.fleetscore.common.mail;
+package com.fleetscore.mail;
 
-import com.fleetscore.common.events.InvitationEmailRequested;
-import com.fleetscore.common.events.VerificationEmailRequested;
-import com.fleetscore.common.events.PasswordResetEmailRequested;
+import com.fleetscore.user.events.InvitationEmailRequested;
+import com.fleetscore.user.events.PasswordResetEmailRequested;
+import com.fleetscore.user.events.VerificationEmailRequested;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

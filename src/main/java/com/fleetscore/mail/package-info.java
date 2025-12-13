@@ -1,2 +1,2 @@
 @org.springframework.modulith.NamedInterface("mail")
-package com.fleetscore.common.mail;
+package com.fleetscore.mail;

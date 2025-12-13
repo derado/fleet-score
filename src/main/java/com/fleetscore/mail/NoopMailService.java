@@ -1,4 +1,4 @@
-package com.fleetscore.common.mail;
+package com.fleetscore.mail;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
