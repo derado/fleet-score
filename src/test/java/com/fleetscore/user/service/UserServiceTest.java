@@ -5,7 +5,6 @@ import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.events.PasswordResetEmailRequested;
 import com.fleetscore.user.events.VerificationEmailRequested;
 import com.fleetscore.user.domain.PasswordResetToken;
-import com.fleetscore.user.domain.Profile;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.domain.VerificationToken;
 import com.fleetscore.user.repository.PasswordResetTokenRepository;
@@ -48,7 +47,7 @@ class UserServiceTest {
     void registerUser_createsUser_savesToken_publishesEvent() {
         // given
         String email = "alice@example.com";
-        RegistrationRequest req = new RegistrationRequest(email, "Secret123!", "Alice", "Doe");
+        RegistrationRequest req = new RegistrationRequest(email, "Secret123!");
 
         // when
         String token = userService.registerUser(req);
@@ -63,9 +62,7 @@ class UserServiceTest {
         assertThat(saved.getPasswordHash()).isNotBlank();
         assertThat(saved.isEmailVerified()).isFalse();
 
-        Profile profile = profileRepository.findByUser(saved).orElseThrow();
-        assertThat(profile.getFirstName()).isEqualTo("Alice");
-        assertThat(profile.getLastName()).isEqualTo("Doe");
+        assertThat(profileRepository.findByUser(saved)).isEmpty();
 
         VerificationToken ver = tokenRepository.findByToken(token).orElseThrow();
         assertThat(ver.getUser().getId()).isEqualTo(saved.getId());
@@ -75,6 +72,22 @@ class UserServiceTest {
         assertThat(published).hasSize(1);
         assertThat(published.getFirst().email()).isEqualTo(email);
         assertThat(published.getFirst().token()).isEqualTo(token);
+    }
+
+    @Test
+    void upsertProfile_createsProfileWhenMissing() {
+        // given
+        String email = "p@example.com";
+        userService.registerUser(new RegistrationRequest(email, "Secret123!"));
+
+        // when
+        userService.upsertProfile(email, "Pat", "Doe");
+
+        // then
+        UserAccount user = userRepository.findByEmail(email).orElseThrow();
+        var profile = profileRepository.findByUser(user).orElseThrow();
+        assertThat(profile.getFirstName()).isEqualTo("Pat");
+        assertThat(profile.getLastName()).isEqualTo("Doe");
     }
 
     @Test

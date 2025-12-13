@@ -47,12 +47,6 @@ public class UserService {
         user.setEmailVerified(false);
         userRepository.save(user);
 
-        Profile profile = new Profile();
-        profile.setUser(user);
-        profile.setFirstName(req.firstName());
-        profile.setLastName(req.lastName());
-        profileRepository.save(profile);
-
         String token = tokenGenerator.generateHexToken(24);
         VerificationToken ver = new VerificationToken();
         ver.setToken(token);
@@ -62,6 +56,22 @@ public class UserService {
 
         events.publishEvent(new VerificationEmailRequested(user.getEmail(), token));
         return token;
+    }
+
+    @Transactional
+    public Profile upsertProfile(String email, String firstName, String lastName) {
+        UserAccount user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Profile profile = profileRepository.findByUser(user).orElseGet(() -> {
+            Profile p = new Profile();
+            p.setUser(user);
+            return p;
+        });
+
+        profile.setFirstName(firstName);
+        profile.setLastName(lastName);
+        return profileRepository.save(profile);
     }
 
     @Transactional
