@@ -10,7 +10,9 @@ import com.fleetscore.user.api.dto.ForgotPasswordRequest;
 import com.fleetscore.user.api.dto.ResetPasswordRequest;
 import com.fleetscore.user.api.dto.ResendVerificationRequest;
 import com.fleetscore.common.api.ApiResponse;
+import com.fleetscore.user.domain.Profile;
 import com.fleetscore.user.domain.UserAccount;
+import com.fleetscore.user.repository.ProfileRepository;
 import com.fleetscore.user.repository.UserAccountRepository;
 import com.fleetscore.user.service.UserService;
 import com.fleetscore.user.service.AuthService;
@@ -32,6 +34,7 @@ public class AuthController {
 
     private final UserService userService;
     private final UserAccountRepository users;
+    private final ProfileRepository profiles;
     private final AuthService authService;
 
     @PostMapping("/register")
@@ -135,8 +138,17 @@ public class AuthController {
         }
         UserAccount ua = users.findByEmail(email).orElse(null);
         Boolean verified = ua != null ? ua.isEmailVerified() : null;
-        String firstName = ua != null ? ua.getFirstName() : null;
-        String lastName = ua != null ? ua.getLastName() : null;
+        String firstName = null;
+        String lastName = null;
+
+        if (ua != null) {
+            Profile profile = profiles.findByUser(ua).orElse(null);
+            if (profile != null) {
+                firstName = profile.getFirstName();
+                lastName = profile.getLastName();
+            }
+        }
+
         MeResponse data = new MeResponse(true, email, firstName, lastName, verified);
         ApiResponse<MeResponse> body = ApiResponse.ok(data, "Current user", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);

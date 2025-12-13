@@ -5,10 +5,12 @@ import com.fleetscore.common.events.VerificationEmailRequested;
 import com.fleetscore.common.util.TokenGenerator;
 import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.domain.PasswordResetToken;
+import com.fleetscore.user.domain.Profile;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.domain.VerificationToken;
 import com.fleetscore.user.repository.InvitationRepository;
 import com.fleetscore.user.repository.PasswordResetTokenRepository;
+import com.fleetscore.user.repository.ProfileRepository;
 import com.fleetscore.user.repository.UserAccountRepository;
 import com.fleetscore.user.repository.VerificationTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     @Mock UserAccountRepository userRepository;
+    @Mock ProfileRepository profileRepository;
     @Mock VerificationTokenRepository tokenRepository;
     @Mock InvitationRepository invitationRepository;
     @Mock PasswordResetTokenRepository passwordResetTokenRepository;
@@ -67,6 +70,10 @@ class UserServiceTest {
                 && ua.getEmail().equals(email)
                 && ua.getPasswordHash().equals("ENC")
                 && !ua.isEmailVerified()));
+        verify(profileRepository).save(argThat(p -> p instanceof Profile pr
+                && pr.getUser() != null
+                && "Alice".equals(pr.getFirstName())
+                && "Doe".equals(pr.getLastName())));
         verify(tokenRepository).save(argThat(v -> v instanceof VerificationToken vt && vt.getToken().equals("VERIF_TOKEN")));
         ArgumentCaptor<Object> ev1 = ArgumentCaptor.forClass(Object.class);
         verify(events).publishEvent(ev1.capture());

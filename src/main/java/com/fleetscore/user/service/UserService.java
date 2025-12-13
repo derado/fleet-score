@@ -23,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 public class UserService {
 
     private final UserAccountRepository userRepository;
+    private final ProfileRepository profileRepository;
     private final VerificationTokenRepository tokenRepository;
     private final InvitationRepository invitationRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
@@ -42,11 +43,15 @@ public class UserService {
         }
         UserAccount user = new UserAccount();
         user.setEmail(req.email());
-        user.setFirstName(req.firstName());
-        user.setLastName(req.lastName());
         user.setPasswordHash(passwordEncoder.encode(req.password()));
         user.setEmailVerified(false);
         userRepository.save(user);
+
+        Profile profile = new Profile();
+        profile.setUser(user);
+        profile.setFirstName(req.firstName());
+        profile.setLastName(req.lastName());
+        profileRepository.save(profile);
 
         String token = tokenGenerator.generateHexToken(24);
         VerificationToken ver = new VerificationToken();

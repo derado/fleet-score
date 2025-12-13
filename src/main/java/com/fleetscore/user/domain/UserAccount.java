@@ -1,12 +1,19 @@
 package com.fleetscore.user.domain;
 
-import jakarta.persistence.*;
+import java.time.Instant;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -24,12 +31,6 @@ public class UserAccount {
 
     @Column(nullable = false, length = 320)
     private String email;
-
-    @Column(nullable = true, length = 100)
-    private String firstName;
-
-    @Column(nullable = true, length = 100)
-    private String lastName;
 
     @Column(nullable = false)
     private String passwordHash;
