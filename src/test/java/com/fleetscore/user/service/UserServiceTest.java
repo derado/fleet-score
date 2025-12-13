@@ -1,6 +1,6 @@
 package com.fleetscore.user.service;
 
-import com.fleetscore.common.util.TokenGenerator;
+import com.fleetscore.FleetScoreApplication;
 import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.events.PasswordResetEmailRequested;
 import com.fleetscore.user.events.VerificationEmailRequested;
@@ -8,80 +8,73 @@ import com.fleetscore.user.domain.PasswordResetToken;
 import com.fleetscore.user.domain.Profile;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.domain.VerificationToken;
-import com.fleetscore.user.repository.InvitationRepository;
 import com.fleetscore.user.repository.PasswordResetTokenRepository;
 import com.fleetscore.user.repository.ProfileRepository;
 import com.fleetscore.user.repository.UserAccountRepository;
 import com.fleetscore.user.repository.VerificationTokenRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = FleetScoreApplication.class)
+@ActiveProfiles("test")
+@RecordApplicationEvents
+@Transactional
 class UserServiceTest {
 
-    @Mock UserAccountRepository userRepository;
-    @Mock ProfileRepository profileRepository;
-    @Mock VerificationTokenRepository tokenRepository;
-    @Mock InvitationRepository invitationRepository;
-    @Mock PasswordResetTokenRepository passwordResetTokenRepository;
-    @Mock PasswordEncoder passwordEncoder;
-    @Mock ApplicationEventPublisher events;
-    @Mock TokenGenerator tokenGenerator;
+    private static final Pattern HEX_UPPER = Pattern.compile("^[0-9A-F]+$");
 
-    @InjectMocks UserService userService;
-
-    @BeforeEach
-    void setup() {
-        ReflectionTestUtils.setField(userService, "resetTtlMinutes", 30);
-    }
+    @Autowired UserAccountRepository userRepository;
+    @Autowired ProfileRepository profileRepository;
+    @Autowired VerificationTokenRepository tokenRepository;
+    @Autowired PasswordResetTokenRepository passwordResetTokenRepository;
+    @Autowired PasswordEncoder passwordEncoder;
+    @Autowired UserService userService;
+    @Autowired ApplicationEvents applicationEvents;
 
     @Test
     void registerUser_createsUser_savesToken_publishesEvent() {
         // given
         String email = "alice@example.com";
-        when(userRepository.existsByEmail(email)).thenReturn(false);
-        when(passwordEncoder.encode("Secret123!")).thenReturn("ENC");
-        when(tokenGenerator.generateHexToken(24)).thenReturn("VERIF_TOKEN");
         RegistrationRequest req = new RegistrationRequest(email, "Secret123!", "Alice", "Doe");
 
         // when
         String token = userService.registerUser(req);
 
         // then
-        assertThat(token).isEqualTo("VERIF_TOKEN");
-        verify(userRepository).save(argThat(u -> u instanceof UserAccount ua
-                && ua.getEmail().equals(email)
-                && ua.getPasswordHash().equals("ENC")
-                && !ua.isEmailVerified()));
-        verify(profileRepository).save(argThat(p -> p instanceof Profile pr
-                && pr.getUser() != null
-                && "Alice".equals(pr.getFirstName())
-                && "Doe".equals(pr.getLastName())));
-        verify(tokenRepository).save(argThat(v -> v instanceof VerificationToken vt && vt.getToken().equals("VERIF_TOKEN")));
-        ArgumentCaptor<Object> ev1 = ArgumentCaptor.forClass(Object.class);
-        verify(events).publishEvent(ev1.capture());
-        Object published1 = ev1.getValue();
-        assertTrue(published1 instanceof VerificationEmailRequested);
-        VerificationEmailRequested ver1 = (VerificationEmailRequested) published1;
-        assertThat(ver1.email()).isEqualTo(email);
-        assertThat(ver1.token()).isEqualTo("VERIF_TOKEN");
+        assertThat(token).isNotBlank();
+        assertThat(token).hasSize(48);
+        assertTrue(HEX_UPPER.matcher(token).matches());
+
+        UserAccount saved = userRepository.findByEmail(email).orElseThrow();
+        assertThat(saved.getEmail()).isEqualTo(email);
+        assertThat(saved.getPasswordHash()).isNotBlank();
+        assertThat(saved.isEmailVerified()).isFalse();
+
+        Profile profile = profileRepository.findByUser(saved).orElseThrow();
+        assertThat(profile.getFirstName()).isEqualTo("Alice");
+        assertThat(profile.getLastName()).isEqualTo("Doe");
+
+        VerificationToken ver = tokenRepository.findByToken(token).orElseThrow();
+        assertThat(ver.getUser().getId()).isEqualTo(saved.getId());
+        assertThat(ver.getExpiresAt()).isAfter(Instant.now());
+
+        var published = applicationEvents.stream(VerificationEmailRequested.class).toList();
+        assertThat(published).hasSize(1);
+        assertThat(published.getFirst().email()).isEqualTo(email);
+        assertThat(published.getFirst().token()).isEqualTo(token);
     }
 
     @Test
@@ -90,31 +83,32 @@ class UserServiceTest {
         String email = "bob@example.com";
         UserAccount user = new UserAccount();
         user.setEmail(email);
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(tokenGenerator.generateHexToken(24)).thenReturn("RST_TOKEN");
+        user.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        user.setEmailVerified(true);
+        userRepository.save(user);
 
         // when
         userService.requestPasswordReset(email);
 
         // then
-        verify(passwordResetTokenRepository).save(argThat(t -> t instanceof PasswordResetToken prt
-                && prt.getToken().equals("RST_TOKEN")
-                && prt.getUser() == user));
-        ArgumentCaptor<Object> ev2 = ArgumentCaptor.forClass(Object.class);
-        verify(events).publishEvent(ev2.capture());
-        Object published2 = ev2.getValue();
-        assertTrue(published2 instanceof PasswordResetEmailRequested);
-        PasswordResetEmailRequested ev = (PasswordResetEmailRequested) published2;
-        assertThat(ev.email()).isEqualTo(email);
-        assertThat(ev.token()).isEqualTo("RST_TOKEN");
+        PasswordResetToken prt = passwordResetTokenRepository.findAll().stream().findFirst().orElseThrow();
+        assertThat(prt.getUser().getEmail()).isEqualTo(email);
+        assertThat(prt.getToken()).isNotBlank();
+        assertThat(prt.getToken()).hasSize(48);
+        assertTrue(HEX_UPPER.matcher(prt.getToken()).matches());
+        assertThat(prt.getExpiresAt()).isAfter(Instant.now());
+
+        var published = applicationEvents.stream(PasswordResetEmailRequested.class).toList();
+        assertThat(published).hasSize(1);
+        assertThat(published.getFirst().email()).isEqualTo(email);
+        assertThat(published.getFirst().token()).isEqualTo(prt.getToken());
     }
 
     @Test
     void requestPasswordReset_nonExistingUser_noOp() {
-        when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
         userService.requestPasswordReset("nobody@example.com");
-        verifyNoInteractions(passwordResetTokenRepository);
-        verify(events, never()).publishEvent(any());
+        assertThat(passwordResetTokenRepository.findAll()).isEmpty();
+        assertThat(applicationEvents.stream(PasswordResetEmailRequested.class).toList()).isEmpty();
     }
 
     @Test
@@ -122,28 +116,44 @@ class UserServiceTest {
         // given
         UserAccount user = new UserAccount();
         user.setEmail("c@example.com");
+        user.setPasswordHash(passwordEncoder.encode("OldPass1!"));
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        String oldHash = user.getPasswordHash();
+
         PasswordResetToken prt = new PasswordResetToken();
         prt.setToken("OK");
         prt.setUser(user);
         prt.setExpiresAt(Instant.now().plusSeconds(3600));
-        when(passwordResetTokenRepository.findByToken("OK")).thenReturn(Optional.of(prt));
-        when(passwordEncoder.encode("NewPass1!"))
-                .thenReturn("ENC_NEW");
+        passwordResetTokenRepository.save(prt);
 
         // when
         userService.resetPassword("OK", "NewPass1!");
 
         // then
-        verify(userRepository).save(argThat(u -> u instanceof UserAccount ua && ua.getPasswordHash().equals("ENC_NEW")));
-        verify(passwordResetTokenRepository).save(argThat(t -> t instanceof PasswordResetToken p && p.getUsedAt() != null));
+        UserAccount updated = userRepository.findByEmail("c@example.com").orElseThrow();
+        assertThat(updated.getPasswordHash()).isNotBlank();
+        assertThat(updated.getPasswordHash()).isNotEqualTo(oldHash);
+        assertTrue(passwordEncoder.matches("NewPass1!", updated.getPasswordHash()));
+
+        PasswordResetToken saved = passwordResetTokenRepository.findByToken("OK").orElseThrow();
+        assertThat(saved.getUsedAt()).isNotNull();
     }
 
     @Test
     void resetPassword_expired_throws() {
+        UserAccount user = new UserAccount();
+        user.setEmail("expired@example.com");
+        user.setPasswordHash(passwordEncoder.encode("OldPass1!"));
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
         PasswordResetToken prt = new PasswordResetToken();
         prt.setToken("EX");
+        prt.setUser(user);
         prt.setExpiresAt(Instant.now().minusSeconds(1));
-        when(passwordResetTokenRepository.findByToken("EX")).thenReturn(Optional.of(prt));
+        passwordResetTokenRepository.save(prt);
 
         assertThrows(IllegalStateException.class, () -> userService.resetPassword("EX", "whatever"));
     }
