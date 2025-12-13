@@ -6,6 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import com.fleetscore.common.api.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.MissingApiVersionException;
+import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +18,20 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler({
+            MissingApiVersionException.class,
+            InvalidApiVersionException.class,
+            NotAcceptableApiVersionException.class
+    })
+    public ResponseEntity<ApiResponse<Void>> handleApiVersioning(RuntimeException ex,
+                                                                 HttpServletRequest request) {
+        String message = (ex.getMessage() == null || ex.getMessage().isBlank())
+                ? "Invalid API version"
+                : ex.getMessage();
+        ApiResponse<Void> body = ApiResponse.error(message, HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex,

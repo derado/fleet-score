@@ -1,0 +1,223 @@
+{
+  "info": {
+    "name": "FleetScore Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for FleetScore authentication flows: register, verify, login, me, refresh, logout."
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const v = (pm.collectionVariables.get('apiVersion') || '').trim();",
+          "pm.request.headers.remove('Api-Version');",
+          "if (v) { pm.request.headers.add({ key: 'Api-Version', value: v }); }"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "email", "value": "user@example.com" },
+    { "key": "password", "value": "Password123!" },
+    { "key": "apiVersion", "value": "" },
+    { "key": "verificationToken", "value": "" },
+    { "key": "invitationToken", "value": "" },
+    { "key": "resetToken", "value": "" },
+    { "key": "newPassword", "value": "NewPassword123!" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api","auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Register returns 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response contains message', function () { var j=pm.response.json(); pm.expect(j.message).to.be.a('string'); });",
+                  "// Verification token is not returned; check app logs (NoopMailService) or real email"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify?token={{verificationToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","auth","verify"],
+              "query": [ { "key": "token", "value": "{{verificationToken}}" } ]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Verify returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Resend Verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/resend-verification", "host": ["{{baseUrl}}"], "path": ["api","auth","resend-verification"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Resend verification returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns 200', function () { pm.response.to.have.status(200); });",
+                  "var j=pm.response.json();",
+                  "if (j && j.data && j.data.accessToken) { pm.collectionVariables.set('accessToken', j.data.accessToken); }",
+                  "pm.test('accessToken captured', function () { pm.expect(pm.collectionVariables.get('accessToken')).to.be.ok; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api","auth","me"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Me returns 200', function () { pm.response.to.have.status(200); });",
+            "var j=pm.response.json(); pm.test('Authenticated true', function () { pm.expect(j.data && j.data.authenticated).to.eql(true); });"
+          ] } } ]
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api","auth","refresh"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Refresh returns 200', function () { pm.response.to.have.status(200); });",
+            "var j=pm.response.json(); if (j && j.data && j.data.accessToken) { pm.collectionVariables.set('accessToken', j.data.accessToken); }",
+            "pm.test('New accessToken captured', function () { pm.expect(pm.collectionVariables.get('accessToken')).to.be.ok; });"
+          ] } } ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api","auth","logout"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Logout returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Accept Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/accept-invitation", "host": ["{{baseUrl}}"], "path": ["api","auth","accept-invitation"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{invitationToken}}\",\n  \"password\": \"{{newPassword}}\"\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Accept invitation returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["api","auth","forgot-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Forgot password returns 200', function () { pm.response.to.have.status(200); });",
+            "var j=pm.response.json(); pm.test('Response contains message', function () { pm.expect(j.message).to.be.a('string'); });",
+            "// Token is delivered via email/logs; set {{resetToken}} manually"
+          ] } } ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["api","auth","reset-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"{{newPassword}}\"\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Reset password returns 200', function () { pm.response.to.have.status(200); });",
+            "var np = pm.collectionVariables.get('newPassword'); if (np) pm.collectionVariables.set('password', np);"
+          ] } } ]
+        }
+      ]
+    }
+  ]
+}
