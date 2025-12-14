@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import com.fleetscore.common.api.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
@@ -66,6 +67,13 @@ public class GlobalExceptionHandler {
                                                             HttpServletRequest request) {
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex,
+                                                                HttpServletRequest request) {
+        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.FORBIDDEN.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(IllegalStateException.class)

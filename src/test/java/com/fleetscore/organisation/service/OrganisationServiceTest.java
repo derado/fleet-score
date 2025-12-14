@@ -1,0 +1,101 @@
+package com.fleetscore.organisation.service;
+
+import com.fleetscore.FleetScoreApplication;
+import com.fleetscore.organisation.repository.OrganisationRepository;
+import com.fleetscore.user.domain.UserAccount;
+import com.fleetscore.user.repository.UserAccountRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest(classes = FleetScoreApplication.class)
+@ActiveProfiles("test")
+@Transactional
+class OrganisationServiceTest {
+
+    @Autowired OrganisationService organisationService;
+    @Autowired OrganisationRepository organisationRepository;
+    @Autowired UserAccountRepository userAccountRepository;
+    @Autowired PasswordEncoder passwordEncoder;
+
+    @Test
+    void createOrganisation_creatorBecomesOwner_andAdmin() {
+        // given
+        UserAccount creator = new UserAccount();
+        creator.setEmail("owner@example.com");
+        creator.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        creator.setEmailVerified(true);
+        userAccountRepository.save(creator);
+
+        // when
+        var resp = organisationService.createOrganisation("owner@example.com", "Sailing Association");
+
+        // then
+        assertThat(resp.id()).isNotNull();
+        var org = organisationRepository.findById(resp.id()).orElseThrow();
+        assertThat(org.getName()).isEqualTo("Sailing Association");
+        assertThat(org.getOwner().getEmail()).isEqualTo("owner@example.com");
+        assertThat(org.getAdmins()).extracting(UserAccount::getEmail).contains("owner@example.com");
+    }
+
+    @Test
+    void promoteAdmin_ownerCanPromoteAnotherUser() {
+        // given
+        UserAccount owner = new UserAccount();
+        owner.setEmail("owner2@example.com");
+        owner.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        owner.setEmailVerified(true);
+        userAccountRepository.save(owner);
+
+        UserAccount other = new UserAccount();
+        other.setEmail("member@example.com");
+        other.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        other.setEmailVerified(true);
+        userAccountRepository.save(other);
+
+        var created = organisationService.createOrganisation("owner2@example.com", "National Sailing Org");
+
+        // when
+        organisationService.promoteAdmin("owner2@example.com", created.id(), "member@example.com");
+
+        // then
+        var org = organisationRepository.findById(created.id()).orElseThrow();
+        assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
+                .contains("owner2@example.com", "member@example.com");
+    }
+
+    @Test
+    void promoteAdmin_nonOwnerIsForbidden() {
+        // given
+        UserAccount owner = new UserAccount();
+        owner.setEmail("owner3@example.com");
+        owner.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        owner.setEmailVerified(true);
+        userAccountRepository.save(owner);
+
+        UserAccount nonOwner = new UserAccount();
+        nonOwner.setEmail("nonowner@example.com");
+        nonOwner.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        nonOwner.setEmailVerified(true);
+        userAccountRepository.save(nonOwner);
+
+        UserAccount target = new UserAccount();
+        target.setEmail("target@example.com");
+        target.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        target.setEmailVerified(true);
+        userAccountRepository.save(target);
+
+        var created = organisationService.createOrganisation("owner3@example.com", "Club Org");
+
+        // when / then
+        assertThrows(AccessDeniedException.class,
+                () -> organisationService.promoteAdmin("nonowner@example.com", created.id(), "target@example.com"));
+    }
+}
