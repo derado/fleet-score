@@ -21,6 +21,9 @@
     { "key": "baseUrl", "value": "http://localhost:8080" },
     { "key": "email", "value": "user@example.com" },
     { "key": "password", "value": "Password123!" },
+    { "key": "firstName", "value": "John" },
+    { "key": "lastName", "value": "Doe" },
+    { "key": "invitedEmail", "value": "invited@example.com" },
     { "key": "apiVersion", "value": "" },
     { "key": "verificationToken", "value": "" },
     { "key": "invitationToken", "value": "" },
@@ -216,6 +219,70 @@
             "pm.test('Reset password returns 200', function () { pm.response.to.have.status(200); });",
             "var np = pm.collectionVariables.get('newPassword'); if (np) pm.collectionVariables.set('password', np);"
           ] } } ]
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Upsert My Profile",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/profile/me", "host": ["{{baseUrl}}"], "path": ["api","profile","me"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Upsert profile returns 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Create Invitation",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/admin/invitations", "host": ["{{baseUrl}}"], "path": ["api","admin","invitations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{invitedEmail}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create invitation returns 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
