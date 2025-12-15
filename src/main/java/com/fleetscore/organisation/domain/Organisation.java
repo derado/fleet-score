@@ -1,5 +1,6 @@
 package com.fleetscore.organisation.domain;
 
+import com.fleetscore.common.persistence.AuditableEntity;
 import com.fleetscore.user.domain.UserAccount;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -29,7 +29,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Organisation {
+public class Organisation extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,10 +37,6 @@ public class Organisation {
 
     @Column(nullable = false, length = 200)
     private String name;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_user_id", nullable = false)
-    private UserAccount owner;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

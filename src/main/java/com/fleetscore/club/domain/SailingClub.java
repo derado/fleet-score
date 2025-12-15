@@ -1,5 +1,6 @@
 package com.fleetscore.club.domain;
 
+import com.fleetscore.common.persistence.AuditableEntity;
 import com.fleetscore.organisation.domain.Organisation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SailingClub {
+public class SailingClub extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

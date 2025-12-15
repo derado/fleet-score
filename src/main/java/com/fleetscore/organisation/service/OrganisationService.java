@@ -24,32 +24,32 @@ public class OrganisationService {
             throw new IllegalStateException("Organisation name already in use");
         }
 
-        UserAccount owner = userAccountRepository.findByEmail(creatorEmail)
+        UserAccount creator = userAccountRepository.findByEmail(creatorEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Organisation organisation = new Organisation();
         organisation.setName(name);
-        organisation.setOwner(owner);
-        organisation.getAdmins().add(owner);
+        organisation.getAdmins().add(creator);
 
         Organisation saved = organisationRepository.save(organisation);
-        return new OrganisationResponse(saved.getId(), saved.getName(), owner.getEmail());
+        return new OrganisationResponse(saved.getId(), saved.getName());
     }
 
     @Transactional
-    public OrganisationResponse promoteAdmin(String ownerEmail, Long organisationId, String newAdminEmail) {
+    public OrganisationResponse promoteAdmin(String requestingAdminEmail, Long organisationId, String newAdminEmail) {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new EntityNotFoundException("Organisation not found"));
 
-        if (!organisation.getOwner().getEmail().equals(ownerEmail)) {
-            throw new AccessDeniedException("Only the organisation owner can promote admins");
+        boolean isAdmin = requestingAdminEmail != null
+                && organisationRepository.existsByIdAndAdmins_Email(organisationId, requestingAdminEmail);
+        if (!isAdmin) {
+            throw new AccessDeniedException("Only organisation admins can promote admins");
         }
 
         UserAccount newAdmin = userAccountRepository.findByEmail(newAdminEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         organisation.getAdmins().add(newAdmin);
-        Organisation saved = organisationRepository.save(organisation);
-        return new OrganisationResponse(saved.getId(), saved.getName(), saved.getOwner().getEmail());
+        return new OrganisationResponse(organisation.getId(), organisation.getName());
     }
 }
