@@ -27,6 +27,8 @@
     { "key": "organisationName", "value": "National Sailing Association" },
     { "key": "organisationId", "value": "" },
     { "key": "organisationAdminEmail", "value": "admin2@example.com" },
+    { "key": "clubName", "value": "Sailing Club Split" },
+    { "key": "clubPlace", "value": "Split" },
     { "key": "apiVersion", "value": "" },
     { "key": "verificationToken", "value": "" },
     { "key": "invitationToken", "value": "" },
@@ -342,6 +344,65 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Promote admin returns 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clubs",
+      "item": [
+        {
+          "name": "Create Club (no organisation)",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"place\": \"{{clubPlace}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create club returns 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Club (under organisation)",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"place\": \"{{clubPlace}}\",\n  \"organisationId\": {{organisationId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create org club returns 201', function () { pm.response.to.have.status(201); });"
                 ]
               }
             }
