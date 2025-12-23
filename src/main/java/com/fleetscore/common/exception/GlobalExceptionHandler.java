@@ -1,6 +1,5 @@
 package com.fleetscore.common.exception;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import com.fleetscore.common.api.ApiResponse;
@@ -19,6 +18,27 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex,
+                                                                    HttpServletRequest request) {
+        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler({EmailAlreadyInUseException.class, DuplicateResourceException.class})
+    public ResponseEntity<ApiResponse<Void>> handleDuplicate(RuntimeException ex,
+                                                             HttpServletRequest request) {
+        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler({TokenExpiredException.class, TokenAlreadyUsedException.class, InvalidTokenException.class})
+    public ResponseEntity<ApiResponse<Void>> handleTokenErrors(RuntimeException ex,
+                                                               HttpServletRequest request) {
+        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
 
     @ExceptionHandler({
             MissingApiVersionException.class,
@@ -60,13 +80,6 @@ public class GlobalExceptionHandler {
                 data
         );
         return ResponseEntity.badRequest().body(body);
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNotFound(EntityNotFoundException ex,
-                                                            HttpServletRequest request) {
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

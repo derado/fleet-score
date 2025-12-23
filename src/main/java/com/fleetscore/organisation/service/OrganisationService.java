@@ -5,7 +5,8 @@ import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.UserAccountRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.fleetscore.common.exception.DuplicateResourceException;
+import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -30,18 +31,18 @@ public class OrganisationService {
     @Transactional(readOnly = true)
     public OrganisationResponse findOrganisationById(Long id) {
         Organisation organisation = organisationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Organisation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
         return toResponse(organisation);
     }
 
     @Transactional
     public OrganisationResponse createOrganisation(String creatorEmail, String name) {
         if (organisationRepository.existsByName(name)) {
-            throw new IllegalStateException("Organisation name already in use");
+            throw new DuplicateResourceException("Organisation", "name", name);
         }
 
         UserAccount creator = userAccountRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Organisation organisation = new Organisation();
         organisation.setName(name);
@@ -54,7 +55,7 @@ public class OrganisationService {
     @Transactional
     public OrganisationResponse promoteAdmin(String requestingAdminEmail, Long organisationId, Long newAdminUserId) {
         Organisation organisation = organisationRepository.findById(organisationId)
-                .orElseThrow(() -> new EntityNotFoundException("Organisation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
 
         boolean isAdmin = requestingAdminEmail != null
                 && organisationRepository.existsByIdAndAdmins_Email(organisationId, requestingAdminEmail);
@@ -63,7 +64,7 @@ public class OrganisationService {
         }
 
         UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         organisation.getAdmins().add(newAdmin);
         return toResponse(organisation);

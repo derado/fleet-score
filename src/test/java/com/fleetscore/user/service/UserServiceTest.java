@@ -1,6 +1,7 @@
 package com.fleetscore.user.service;
 
 import com.fleetscore.FleetScoreApplication;
+import com.fleetscore.common.exception.TokenExpiredException;
 import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.events.PasswordResetEmailRequested;
 import com.fleetscore.user.events.VerificationEmailRequested;
@@ -168,6 +169,6 @@ class UserServiceTest {
         prt.setExpiresAt(Instant.now().minusSeconds(1));
         passwordResetTokenRepository.save(prt);
 
-        assertThrows(IllegalStateException.class, () -> userService.resetPassword("EX", "whatever"));
+        assertThrows(TokenExpiredException.class, () -> userService.resetPassword("EX", "whatever"));
     }
 }

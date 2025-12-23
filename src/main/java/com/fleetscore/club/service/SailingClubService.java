@@ -7,7 +7,7 @@ import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.UserAccountRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class SailingClubService {
     @Transactional(readOnly = true)
     public SailingClubResponse findClubById(Long id) {
         SailingClub club = sailingClubRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
         return toResponse(club);
     }
 
@@ -43,7 +43,7 @@ public class SailingClubService {
 
         if (organisationId != null) {
             if (!organisationRepository.existsById(organisationId)) {
-                throw new EntityNotFoundException("Organisation not found");
+                throw new ResourceNotFoundException("Organisation not found");
             }
 
             boolean isAdmin = organisationRepository.existsByIdAndAdmins_Email(organisationId, creatorEmail);
@@ -55,7 +55,7 @@ public class SailingClubService {
         }
 
         UserAccount creator = userAccountRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         SailingClub club = new SailingClub();
         club.setName(name);
@@ -70,7 +70,7 @@ public class SailingClubService {
     @Transactional
     public SailingClubResponse promoteAdmin(String requestingAdminEmail, Long clubId, Long newAdminUserId) {
         SailingClub club = sailingClubRepository.findById(clubId)
-                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
 
         boolean isAdmin = requestingAdminEmail != null
                 && sailingClubRepository.existsByIdAndAdmins_Email(clubId, requestingAdminEmail);
@@ -79,7 +79,7 @@ public class SailingClubService {
         }
 
         UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         club.getAdmins().add(newAdmin);
         return toResponse(club);
@@ -88,10 +88,10 @@ public class SailingClubService {
     @Transactional
     public SailingClubResponse joinClub(String email, Long clubId) {
         SailingClub club = sailingClubRepository.findById(clubId)
-                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
 
         UserAccount user = userAccountRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         club.getMembers().add(user);
         sailingClubRepository.save(club);
@@ -101,10 +101,10 @@ public class SailingClubService {
     @Transactional
     public SailingClubResponse leaveClub(String email, Long clubId) {
         SailingClub club = sailingClubRepository.findById(clubId)
-                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
 
         UserAccount user = userAccountRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         club.getMembers().remove(user);
         sailingClubRepository.save(club);

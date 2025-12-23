@@ -4,7 +4,11 @@ import com.fleetscore.user.api.dto.MeResponse;
 import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.domain.*;
 import com.fleetscore.user.repository.*;
-import jakarta.persistence.EntityNotFoundException;
+import com.fleetscore.common.exception.EmailAlreadyInUseException;
+import com.fleetscore.common.exception.InvalidTokenException;
+import com.fleetscore.common.exception.ResourceNotFoundException;
+import com.fleetscore.common.exception.TokenAlreadyUsedException;
+import com.fleetscore.common.exception.TokenExpiredException;
 import lombok.RequiredArgsConstructor;
 import com.fleetscore.user.events.InvitationEmailRequested;
 import com.fleetscore.user.events.PasswordResetEmailRequested;
@@ -40,7 +44,7 @@ public class UserService {
     @Transactional
     public String registerUser(RegistrationRequest req) {
         if (userRepository.existsByEmail(req.email())) {
-            throw new IllegalStateException("Email already in use");
+            throw new EmailAlreadyInUseException();
         }
         UserAccount user = new UserAccount();
         user.setEmail(req.email());
@@ -62,7 +66,7 @@ public class UserService {
     @Transactional
     public Profile upsertProfile(String email, String firstName, String lastName) {
         UserAccount user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", email));
 
         Profile profile = profileRepository.findByUser(user).orElseGet(() -> {
             Profile p = new Profile();
@@ -78,12 +82,12 @@ public class UserService {
     @Transactional
     public void verifyEmail(String token) {
         VerificationToken ver = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new EntityNotFoundException("Invalid verification token"));
+                .orElseThrow(() -> new InvalidTokenException("verification"));
         if (ver.isUsed()) {
-            throw new IllegalStateException("Token already used");
+            throw new TokenAlreadyUsedException("Verification");
         }
         if (ver.isExpired()) {
-            throw new IllegalStateException("Token expired");
+            throw new TokenExpiredException("Verification");
         }
         UserAccount user = ver.getUser();
         user.setEmailVerified(true);
@@ -95,9 +99,9 @@ public class UserService {
     @Transactional
     public String createInvitation(String email, Long userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Requesting user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalStateException("User with email already exists");
+            throw new EmailAlreadyInUseException();
         }
         String token = tokenGenerator.generateHexToken(24);
         Invitation inv = new Invitation();
@@ -113,15 +117,15 @@ public class UserService {
     @Transactional
     public void acceptInvitation(String token, String password) {
         Invitation inv = invitationRepository.findByToken(token)
-                .orElseThrow(() -> new EntityNotFoundException("Invalid invitation token"));
+                .orElseThrow(() -> new InvalidTokenException("invitation"));
         if (inv.isUsed()) {
-            throw new IllegalStateException("Invitation already used");
+            throw new TokenAlreadyUsedException("Invitation");
         }
         if (inv.isExpired()) {
-            throw new IllegalStateException("Invitation expired");
+            throw new TokenExpiredException("Invitation");
         }
         if (userRepository.existsByEmail(inv.getEmail())) {
-            throw new IllegalStateException("User with email already exists");
+            throw new EmailAlreadyInUseException();
         }
         UserAccount user = new UserAccount();
         user.setEmail(inv.getEmail());
@@ -149,12 +153,12 @@ public class UserService {
     @Transactional
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken prt = passwordResetTokenRepository.findByToken(token)
-                .orElseThrow(() -> new EntityNotFoundException("Invalid password reset token"));
+                .orElseThrow(() -> new InvalidTokenException("password reset"));
         if (prt.isUsed()) {
-            throw new IllegalStateException("Token already used");
+            throw new TokenAlreadyUsedException("Password reset");
         }
         if (prt.isExpired()) {
-            throw new IllegalStateException("Token expired");
+            throw new TokenExpiredException("Password reset");
         }
         UserAccount user = prt.getUser();
         user.setPasswordHash(passwordEncoder.encode(newPassword));

@@ -8,6 +8,8 @@ import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.RefreshTokenRepository;
 import com.fleetscore.user.repository.UserAccountRepository;
 import com.fleetscore.common.util.TokenGenerator;
+import com.fleetscore.common.exception.InvalidTokenException;
+import com.fleetscore.common.exception.TokenExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -78,12 +80,12 @@ public class AuthService {
     public TokenResponse refresh(HttpServletRequest request, HttpServletResponse response) {
         String rt = extractRefreshTokenFromCookie(request);
         if (rt == null) {
-            throw new IllegalStateException("Missing refresh token");
+            throw new InvalidTokenException("refresh");
         }
         RefreshToken token = refreshTokens.findByToken(rt)
-                .orElseThrow(() -> new IllegalStateException("Invalid refresh token"));
+                .orElseThrow(() -> new InvalidTokenException("refresh"));
         if (token.isRevoked() || token.getExpiresAt().isBefore(Instant.now())) {
-            throw new IllegalStateException("Refresh token expired or revoked");
+            throw new TokenExpiredException("Refresh");
         }
         UserAccount user = token.getUser();
 
