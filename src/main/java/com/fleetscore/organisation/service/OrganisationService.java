@@ -36,7 +36,7 @@ public class OrganisationService {
     }
 
     @Transactional
-    public OrganisationResponse promoteAdmin(String requestingAdminEmail, Long organisationId, String newAdminEmail) {
+    public OrganisationResponse promoteAdmin(String requestingAdminEmail, Long organisationId, Long newAdminUserId) {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new EntityNotFoundException("Organisation not found"));
 
@@ -46,7 +46,7 @@ public class OrganisationService {
             throw new AccessDeniedException("Only organisation admins can promote admins");
         }
 
-        UserAccount newAdmin = userAccountRepository.findByEmail(newAdminEmail)
+        UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         organisation.getAdmins().add(newAdmin);

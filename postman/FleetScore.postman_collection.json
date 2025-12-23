@@ -26,7 +26,7 @@
     { "key": "invitedEmail", "value": "invited@example.com" },
     { "key": "organisationName", "value": "National Sailing Association" },
     { "key": "organisationId", "value": "" },
-    { "key": "organisationAdminEmail", "value": "admin2@example.com" },
+    { "key": "organisationAdminUserId", "value": "" },
     { "key": "clubName", "value": "Sailing Club Split" },
     { "key": "clubPlace", "value": "Split" },
     { "key": "apiVersion", "value": "" },
@@ -334,7 +334,7 @@
             "url": { "raw": "{{baseUrl}}/api/organisations/{{organisationId}}/admins", "host": ["{{baseUrl}}"], "path": ["api","organisations","{{organisationId}}","admins"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{organisationAdminEmail}}\"\n}"
+              "raw": "{\n  \"userId\": {{organisationAdminUserId}}\n}"
             }
           },
           "event": [

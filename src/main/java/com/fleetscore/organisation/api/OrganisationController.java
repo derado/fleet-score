@@ -48,7 +48,7 @@ public class OrganisationController {
             @Valid @RequestBody PromoteOrganisationAdminRequest request,
             HttpServletRequest httpRequest
     ) {
-        OrganisationResponse data = organisationService.promoteAdmin(email, organisationId, request.email());
+        OrganisationResponse data = organisationService.promoteAdmin(email, organisationId, request.userId());
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
                 "Organisation admin promoted",

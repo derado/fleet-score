@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = FleetScoreApplication.class)
-@ActiveProfiles("test")
 @Transactional
 class OrganisationServiceTest {
 
@@ -27,26 +26,22 @@ class OrganisationServiceTest {
 
     @Test
     void createOrganisation_creatorBecomesAdmin() {
-        // given
         UserAccount creator = new UserAccount();
         creator.setEmail("owner@example.com");
         creator.setPasswordHash(passwordEncoder.encode("Secret123!"));
         creator.setEmailVerified(true);
         userAccountRepository.save(creator);
 
-        // when
-        var resp = organisationService.createOrganisation("owner@example.com", "Sailing Association");
+        var organisationResponse = organisationService.createOrganisation("owner@example.com", "Sailing Association");
+        assertThat(organisationResponse.id()).isNotNull();
 
-        // then
-        assertThat(resp.id()).isNotNull();
-        var org = organisationRepository.findById(resp.id()).orElseThrow();
+        var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getName()).isEqualTo("Sailing Association");
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail).contains("owner@example.com");
     }
 
     @Test
     void promoteAdmin_adminCanPromoteAnotherUser() {
-        // given
         UserAccount owner = new UserAccount();
         owner.setEmail("owner2@example.com");
         owner.setPasswordHash(passwordEncoder.encode("Secret123!"));
@@ -59,20 +54,17 @@ class OrganisationServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var created = organisationService.createOrganisation("owner2@example.com", "National Sailing Org");
+        var organisationResponse = organisationService.createOrganisation("owner2@example.com", "National Sailing Org");
 
-        // when
-        organisationService.promoteAdmin("owner2@example.com", created.id(), "member@example.com");
+        organisationService.promoteAdmin("owner2@example.com", organisationResponse.id(), other.getId());
 
-        // then
-        var org = organisationRepository.findById(created.id()).orElseThrow();
+        var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
                 .contains("owner2@example.com", "member@example.com");
     }
 
     @Test
     void promoteAdmin_anyAdminCanPromoteAdmins() {
-        // given
         UserAccount creator = new UserAccount();
         creator.setEmail("creator@example.com");
         creator.setPasswordHash(passwordEncoder.encode("Secret123!"));
@@ -91,21 +83,18 @@ class OrganisationServiceTest {
         target.setEmailVerified(true);
         userAccountRepository.save(target);
 
-        var created = organisationService.createOrganisation("creator@example.com", "Org X");
-        organisationService.promoteAdmin("creator@example.com", created.id(), "admin@example.com");
+        var organisationResponse = organisationService.createOrganisation("creator@example.com", "Org X");
+        organisationService.promoteAdmin("creator@example.com", organisationResponse.id(), firstAdmin.getId());
 
-        // when
-        organisationService.promoteAdmin("admin@example.com", created.id(), "target2@example.com");
+        organisationService.promoteAdmin("admin@example.com", organisationResponse.id(), target.getId());
 
-        // then
-        var org = organisationRepository.findById(created.id()).orElseThrow();
+        var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
                 .contains("creator@example.com", "admin@example.com", "target2@example.com");
     }
 
     @Test
     void promoteAdmin_nonAdminIsForbidden() {
-        // given
         UserAccount owner = new UserAccount();
         owner.setEmail("owner3@example.com");
         owner.setPasswordHash(passwordEncoder.encode("Secret123!"));
@@ -126,8 +115,26 @@ class OrganisationServiceTest {
 
         var created = organisationService.createOrganisation("owner3@example.com", "Club Org");
 
-        // when / then
         assertThrows(AccessDeniedException.class,
-                () -> organisationService.promoteAdmin("nonowner@example.com", created.id(), "target@example.com"));
+                () -> organisationService.promoteAdmin("nonowner@example.com", created.id(), target.getId()));
+    }
+
+    @Test
+    void promoteAdmin_existingAdminIsNotAddedAgain() {
+        UserAccount admin = new UserAccount();
+        admin.setEmail("admin@example.com");
+        admin.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        admin.setEmailVerified(true);
+        userAccountRepository.save(admin);
+
+        var organisationResponse = organisationService.createOrganisation("admin@example.com", "Test Org");
+
+        var orgBefore = organisationRepository.findById(organisationResponse.id()).orElseThrow();
+        int adminCountBefore = orgBefore.getAdmins().size();
+
+        organisationService.promoteAdmin("admin@example.com", organisationResponse.id(), admin.getId());
+
+        var orgAfter = organisationRepository.findById(organisationResponse.id()).orElseThrow();
+        assertThat(orgAfter.getAdmins()).hasSize(adminCountBefore);
     }
 }
