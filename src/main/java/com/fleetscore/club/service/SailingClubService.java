@@ -48,11 +48,7 @@ public class SailingClubService {
         club.getAdmins().add(creator);
 
         SailingClub saved = sailingClubRepository.save(club);
-
-        Long orgId = saved.getOrganisation() != null ? saved.getOrganisation().getId() : null;
-        String orgName = saved.getOrganisation() != null ? saved.getOrganisation().getName() : null;
-
-        return new SailingClubResponse(saved.getId(), saved.getName(), saved.getPlace(), orgId, orgName);
+        return toResponse(saved);
     }
 
     @Transactional
@@ -70,11 +66,7 @@ public class SailingClubService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         club.getAdmins().add(newAdmin);
-
-        Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
-        String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
-
-        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
+        return toResponse(club);
     }
 
     @Transactional
@@ -87,11 +79,7 @@ public class SailingClubService {
 
         club.getMembers().add(user);
         sailingClubRepository.save(club);
-
-        Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
-        String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
-
-        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
+        return toResponse(club);
     }
 
     @Transactional
@@ -104,10 +92,12 @@ public class SailingClubService {
 
         club.getMembers().remove(user);
         sailingClubRepository.save(club);
+        return toResponse(club);
+    }
 
+    private SailingClubResponse toResponse(SailingClub club) {
         Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
         String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
-
         return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
     }
 }

@@ -32,7 +32,7 @@ public class OrganisationService {
         organisation.getAdmins().add(creator);
 
         Organisation saved = organisationRepository.save(organisation);
-        return new OrganisationResponse(saved.getId(), saved.getName());
+        return toResponse(saved);
     }
 
     @Transactional
@@ -50,6 +50,10 @@ public class OrganisationService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         organisation.getAdmins().add(newAdmin);
+        return toResponse(organisation);
+    }
+
+    private OrganisationResponse toResponse(Organisation organisation) {
         return new OrganisationResponse(organisation.getId(), organisation.getName());
     }
 }
