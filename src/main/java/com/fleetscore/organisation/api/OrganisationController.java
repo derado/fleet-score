@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -57,6 +58,7 @@ public class OrganisationController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrganisationResponse>> createOrganisation(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateOrganisationRequest request,
@@ -74,14 +76,13 @@ public class OrganisationController {
     }
 
     @PutMapping("/{organisationId}/admins")
+    @PreAuthorize("@orgAuthz.isAdmin(authentication.token.claims['email'], #organisationId)")
     public ResponseEntity<ApiResponse<OrganisationResponse>> promoteAdmin(
-            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long organisationId,
             @Valid @RequestBody PromoteOrganisationAdminRequest request,
             HttpServletRequest httpRequest
     ) {
-        String email = jwt.getClaimAsString("email");
-        OrganisationResponse data = organisationService.promoteAdmin(email, organisationId, request.userId());
+        OrganisationResponse data = organisationService.promoteAdmin(organisationId, request.userId());
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
                 "Organisation admin promoted",

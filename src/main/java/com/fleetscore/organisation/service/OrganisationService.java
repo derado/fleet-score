@@ -53,15 +53,9 @@ public class OrganisationService {
     }
 
     @Transactional
-    public OrganisationResponse promoteAdmin(String requestingAdminEmail, Long organisationId, Long newAdminUserId) {
+    public OrganisationResponse promoteAdmin(Long organisationId, Long newAdminUserId) {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
-
-        boolean isAdmin = requestingAdminEmail != null
-                && organisationRepository.existsByIdAndAdmins_Email(organisationId, requestingAdminEmail);
-        if (!isAdmin) {
-            throw new AccessDeniedException("Only organisation admins can promote admins");
-        }
 
         UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

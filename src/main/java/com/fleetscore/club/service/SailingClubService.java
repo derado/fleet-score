@@ -68,15 +68,9 @@ public class SailingClubService {
     }
 
     @Transactional
-    public SailingClubResponse promoteAdmin(String requestingAdminEmail, Long clubId, Long newAdminUserId) {
+    public SailingClubResponse promoteAdmin(Long clubId, Long newAdminUserId) {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
-
-        boolean isAdmin = requestingAdminEmail != null
-                && sailingClubRepository.existsByIdAndAdmins_Email(clubId, requestingAdminEmail);
-        if (!isAdmin) {
-            throw new AccessDeniedException("Only club admins can promote admins");
-        }
 
         UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

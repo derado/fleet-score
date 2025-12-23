@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -28,6 +29,7 @@ public class AdminController {
     private final UserAccountRepository users;
 
     @PostMapping("/invitations")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<NoContent>> invite(@AuthenticationPrincipal UserDetails principal,
                                                     @Valid @RequestBody InvitationRequest request,
                                                     HttpServletRequest httpRequest) {

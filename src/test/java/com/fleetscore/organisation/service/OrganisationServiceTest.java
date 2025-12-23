@@ -7,13 +7,11 @@ import com.fleetscore.user.repository.UserAccountRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = FleetScoreApplication.class)
 @Transactional
@@ -56,7 +54,7 @@ class OrganisationServiceTest {
 
         var organisationResponse = organisationService.createOrganisation("owner2@example.com", "National Sailing Org");
 
-        organisationService.promoteAdmin("owner2@example.com", organisationResponse.id(), other.getId());
+        organisationService.promoteAdmin(organisationResponse.id(), other.getId());
 
         var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
@@ -84,39 +82,13 @@ class OrganisationServiceTest {
         userAccountRepository.save(target);
 
         var organisationResponse = organisationService.createOrganisation("creator@example.com", "Org X");
-        organisationService.promoteAdmin("creator@example.com", organisationResponse.id(), firstAdmin.getId());
+        organisationService.promoteAdmin(organisationResponse.id(), firstAdmin.getId());
 
-        organisationService.promoteAdmin("admin@example.com", organisationResponse.id(), target.getId());
+        organisationService.promoteAdmin(organisationResponse.id(), target.getId());
 
         var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
                 .contains("creator@example.com", "admin@example.com", "target2@example.com");
-    }
-
-    @Test
-    void promoteAdmin_nonAdminIsForbidden() {
-        UserAccount owner = new UserAccount();
-        owner.setEmail("owner3@example.com");
-        owner.setPasswordHash(passwordEncoder.encode("Secret123!"));
-        owner.setEmailVerified(true);
-        userAccountRepository.save(owner);
-
-        UserAccount nonOwner = new UserAccount();
-        nonOwner.setEmail("nonowner@example.com");
-        nonOwner.setPasswordHash(passwordEncoder.encode("Secret123!"));
-        nonOwner.setEmailVerified(true);
-        userAccountRepository.save(nonOwner);
-
-        UserAccount target = new UserAccount();
-        target.setEmail("target@example.com");
-        target.setPasswordHash(passwordEncoder.encode("Secret123!"));
-        target.setEmailVerified(true);
-        userAccountRepository.save(target);
-
-        var created = organisationService.createOrganisation("owner3@example.com", "Club Org");
-
-        assertThrows(AccessDeniedException.class,
-                () -> organisationService.promoteAdmin("nonowner@example.com", created.id(), target.getId()));
     }
 
     @Test
@@ -132,7 +104,7 @@ class OrganisationServiceTest {
         var orgBefore = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         int adminCountBefore = orgBefore.getAdmins().size();
 
-        organisationService.promoteAdmin("admin@example.com", organisationResponse.id(), admin.getId());
+        organisationService.promoteAdmin(organisationResponse.id(), admin.getId());
 
         var orgAfter = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(orgAfter.getAdmins()).hasSize(adminCountBefore);

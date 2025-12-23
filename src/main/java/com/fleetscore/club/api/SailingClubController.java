@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class SailingClubController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> createClub(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateSailingClubRequest request,
@@ -75,14 +77,13 @@ public class SailingClubController {
     }
 
     @PutMapping("/{clubId}/admins")
+    @PreAuthorize("@clubAuthz.isAdmin(authentication.token.claims['email'], #clubId)")
     public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
-            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long clubId,
             @Valid @RequestBody PromoteClubAdminRequest request,
             HttpServletRequest httpRequest
     ) {
-        String email = jwt.getClaimAsString("email");
-        SailingClubResponse data = sailingClubService.promoteAdmin(email, clubId, request.userId());
+        SailingClubResponse data = sailingClubService.promoteAdmin(clubId, request.userId());
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
                 "Club admin promoted",
@@ -93,6 +94,7 @@ public class SailingClubController {
     }
 
     @PostMapping("/{clubId}/members")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> joinClub(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long clubId,
@@ -110,6 +112,7 @@ public class SailingClubController {
     }
 
     @DeleteMapping("/{clubId}/members")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> leaveClub(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long clubId,

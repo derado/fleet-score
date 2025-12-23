@@ -122,37 +122,11 @@ class SailingClubServiceTest {
 
         var clubResponse = sailingClubService.createClub("clubadmin@example.com", "Promo Club", "Pula", null);
 
-        sailingClubService.promoteAdmin("clubadmin@example.com", clubResponse.id(), other.getId());
+        sailingClubService.promoteAdmin(clubResponse.id(), other.getId());
 
         var club = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         assertThat(club.getAdmins()).extracting(UserAccount::getEmail)
                 .contains("clubadmin@example.com", "newadmin@example.com");
-    }
-
-    @Test
-    void promoteAdmin_nonAdminIsForbidden() {
-        UserAccount creator = new UserAccount();
-        creator.setEmail("clubadmin2@example.com");
-        creator.setPasswordHash(passwordEncoder.encode("Secret123!"));
-        creator.setEmailVerified(true);
-        userAccountRepository.save(creator);
-
-        UserAccount nonAdmin = new UserAccount();
-        nonAdmin.setEmail("nonadmin2@example.com");
-        nonAdmin.setPasswordHash(passwordEncoder.encode("Secret123!"));
-        nonAdmin.setEmailVerified(true);
-        userAccountRepository.save(nonAdmin);
-
-        UserAccount target = new UserAccount();
-        target.setEmail("target@example.com");
-        target.setPasswordHash(passwordEncoder.encode("Secret123!"));
-        target.setEmailVerified(true);
-        userAccountRepository.save(target);
-
-        var clubResponse = sailingClubService.createClub("clubadmin2@example.com", "Secure Club", "Sibenik", null);
-
-        assertThrows(AccessDeniedException.class,
-                () -> sailingClubService.promoteAdmin("nonadmin2@example.com", clubResponse.id(), target.getId()));
     }
 
     @Test
@@ -168,7 +142,7 @@ class SailingClubServiceTest {
         var clubBefore = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         int adminCountBefore = clubBefore.getAdmins().size();
 
-        sailingClubService.promoteAdmin("dupeadmin@example.com", clubResponse.id(), admin.getId());
+        sailingClubService.promoteAdmin(clubResponse.id(), admin.getId());
 
         var clubAfter = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         assertThat(clubAfter.getAdmins()).hasSize(adminCountBefore);
