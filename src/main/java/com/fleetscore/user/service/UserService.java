@@ -1,5 +1,6 @@
 package com.fleetscore.user.service;
 
+import com.fleetscore.user.api.dto.MeResponse;
 import com.fleetscore.user.api.dto.RegistrationRequest;
 import com.fleetscore.user.domain.*;
 import com.fleetscore.user.repository.*;
@@ -176,5 +177,21 @@ public class UserService {
             tokenRepository.save(ver);
             events.publishEvent(new VerificationEmailRequested(user.getEmail(), token));
         });
+    }
+
+    @Transactional(readOnly = true)
+    public MeResponse getCurrentUser(String email) {
+        if (email == null) {
+            return new MeResponse(false, null, null, null, null);
+        }
+
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    Profile profile = profileRepository.findByUser(user).orElse(null);
+                    String firstName = profile != null ? profile.getFirstName() : null;
+                    String lastName = profile != null ? profile.getLastName() : null;
+                    return new MeResponse(true, email, firstName, lastName, user.isEmailVerified());
+                })
+                .orElse(new MeResponse(false, null, null, null, null));
     }
 }

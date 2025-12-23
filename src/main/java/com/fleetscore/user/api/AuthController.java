@@ -10,10 +10,6 @@ import com.fleetscore.user.api.dto.ForgotPasswordRequest;
 import com.fleetscore.user.api.dto.ResetPasswordRequest;
 import com.fleetscore.user.api.dto.ResendVerificationRequest;
 import com.fleetscore.common.api.ApiResponse;
-import com.fleetscore.user.domain.Profile;
-import com.fleetscore.user.domain.UserAccount;
-import com.fleetscore.user.repository.ProfileRepository;
-import com.fleetscore.user.repository.UserAccountRepository;
 import com.fleetscore.user.service.UserService;
 import com.fleetscore.user.service.AuthService;
 import jakarta.validation.Valid;
@@ -34,8 +30,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
-    private final UserAccountRepository users;
-    private final ProfileRepository profiles;
     private final AuthService authService;
 
     @PostMapping("/register")
@@ -132,27 +126,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<MeResponse>> me(@AuthenticationPrincipal Jwt jwt,
                                                       Authentication authentication,
                                                       HttpServletRequest httpRequest) {
-        String email = jwt != null ? jwt.getClaimAsString("email") : null;
-        if (authentication == null || !authentication.isAuthenticated() || email == null) {
-            MeResponse data = new MeResponse(false, null, null, null, null);
-            ApiResponse<MeResponse> body = ApiResponse.ok(data, "Anonymous", HttpStatus.OK.value(), httpRequest.getRequestURI());
-            return ResponseEntity.ok(body);
-        }
-        UserAccount ua = users.findByEmail(email).orElse(null);
-        Boolean verified = ua != null ? ua.isEmailVerified() : null;
-        String firstName = null;
-        String lastName = null;
-
-        if (ua != null) {
-            Profile profile = profiles.findByUser(ua).orElse(null);
-            if (profile != null) {
-                firstName = profile.getFirstName();
-                lastName = profile.getLastName();
-            }
-        }
-
-        MeResponse data = new MeResponse(true, email, firstName, lastName, verified);
-        ApiResponse<MeResponse> body = ApiResponse.ok(data, "Current user", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        String email = (jwt != null && authentication != null && authentication.isAuthenticated())
+                ? jwt.getClaimAsString("email")
+                : null;
+        MeResponse data = userService.getCurrentUser(email);
+        String message = data.authenticated() ? "Current user" : "Anonymous";
+        ApiResponse<MeResponse> body = ApiResponse.ok(data, message, HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
 }
