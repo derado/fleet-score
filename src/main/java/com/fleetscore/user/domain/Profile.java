@@ -2,7 +2,6 @@ package com.fleetscore.user.domain;
 
 import com.fleetscore.common.persistence.AuditableEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Profile extends AuditableEntity {
 
     @Id
