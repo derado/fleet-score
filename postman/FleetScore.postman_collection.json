@@ -29,6 +29,8 @@
     { "key": "organisationAdminUserId", "value": "" },
     { "key": "clubName", "value": "Sailing Club Split" },
     { "key": "clubPlace", "value": "Split" },
+    { "key": "clubId", "value": "" },
+    { "key": "clubAdminUserId", "value": "" },
     { "key": "apiVersion", "value": "" },
     { "key": "verificationToken", "value": "" },
     { "key": "invitationToken", "value": "" },
@@ -403,6 +405,33 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Create org club returns 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Promote Club Admin",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clubs/{{clubId}}/admins", "host": ["{{baseUrl}}"], "path": ["api","clubs","{{clubId}}","admins"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{clubAdminUserId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Promote club admin returns 200', function () { pm.response.to.have.status(200); });"
                 ]
               }
             }

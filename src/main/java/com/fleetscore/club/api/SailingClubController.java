@@ -1,6 +1,7 @@
 package com.fleetscore.club.api;
 
 import com.fleetscore.club.api.dto.CreateSailingClubRequest;
+import com.fleetscore.club.api.dto.PromoteClubAdminRequest;
 import com.fleetscore.club.api.dto.SailingClubResponse;
 import com.fleetscore.club.service.SailingClubService;
 import com.fleetscore.common.api.ApiResponse;
@@ -10,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,5 +39,22 @@ public class SailingClubController {
                 httpRequest.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+
+    @PutMapping("/{clubId}/admins")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
+            @AuthenticationPrincipal(expression = "claims['email']") String email,
+            @PathVariable Long clubId,
+            @Valid @RequestBody PromoteClubAdminRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        SailingClubResponse data = sailingClubService.promoteAdmin(email, clubId, request.userId());
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Club admin promoted",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
     }
 }

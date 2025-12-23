@@ -91,4 +91,86 @@ class SailingClubServiceTest {
 
         assertThat(organisationRepository.findById(org.id())).isPresent();
     }
+
+    @Test
+    void createClub_creatorBecomesAdmin() {
+        UserAccount user = new UserAccount();
+        user.setEmail("clubcreator@example.com");
+        user.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        user.setEmailVerified(true);
+        userAccountRepository.save(user);
+
+        var clubResponse = sailingClubService.createClub("clubcreator@example.com", "Admin Club", "Dubrovnik", null);
+
+        var club = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
+        assertThat(club.getAdmins()).extracting(UserAccount::getEmail).contains("clubcreator@example.com");
+    }
+
+    @Test
+    void promoteAdmin_adminCanPromoteAnotherUser() {
+        UserAccount creator = new UserAccount();
+        creator.setEmail("clubadmin@example.com");
+        creator.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        creator.setEmailVerified(true);
+        userAccountRepository.save(creator);
+
+        UserAccount other = new UserAccount();
+        other.setEmail("newadmin@example.com");
+        other.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        other.setEmailVerified(true);
+        userAccountRepository.save(other);
+
+        var clubResponse = sailingClubService.createClub("clubadmin@example.com", "Promo Club", "Pula", null);
+
+        sailingClubService.promoteAdmin("clubadmin@example.com", clubResponse.id(), other.getId());
+
+        var club = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
+        assertThat(club.getAdmins()).extracting(UserAccount::getEmail)
+                .contains("clubadmin@example.com", "newadmin@example.com");
+    }
+
+    @Test
+    void promoteAdmin_nonAdminIsForbidden() {
+        UserAccount creator = new UserAccount();
+        creator.setEmail("clubadmin2@example.com");
+        creator.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        creator.setEmailVerified(true);
+        userAccountRepository.save(creator);
+
+        UserAccount nonAdmin = new UserAccount();
+        nonAdmin.setEmail("nonadmin2@example.com");
+        nonAdmin.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        nonAdmin.setEmailVerified(true);
+        userAccountRepository.save(nonAdmin);
+
+        UserAccount target = new UserAccount();
+        target.setEmail("target@example.com");
+        target.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        target.setEmailVerified(true);
+        userAccountRepository.save(target);
+
+        var clubResponse = sailingClubService.createClub("clubadmin2@example.com", "Secure Club", "Sibenik", null);
+
+        assertThrows(AccessDeniedException.class,
+                () -> sailingClubService.promoteAdmin("nonadmin2@example.com", clubResponse.id(), target.getId()));
+    }
+
+    @Test
+    void promoteAdmin_existingAdminIsNotAddedAgain() {
+        UserAccount admin = new UserAccount();
+        admin.setEmail("dupeadmin@example.com");
+        admin.setPasswordHash(passwordEncoder.encode("Secret123!"));
+        admin.setEmailVerified(true);
+        userAccountRepository.save(admin);
+
+        var clubResponse = sailingClubService.createClub("dupeadmin@example.com", "Dupe Club", "Trogir", null);
+
+        var clubBefore = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
+        int adminCountBefore = clubBefore.getAdmins().size();
+
+        sailingClubService.promoteAdmin("dupeadmin@example.com", clubResponse.id(), admin.getId());
+
+        var clubAfter = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
+        assertThat(clubAfter.getAdmins()).hasSize(adminCountBefore);
+    }
 }
