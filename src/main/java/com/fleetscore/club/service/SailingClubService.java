@@ -76,4 +76,38 @@ public class SailingClubService {
 
         return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
     }
+
+    @Transactional
+    public SailingClubResponse joinClub(String email, Long clubId) {
+        SailingClub club = sailingClubRepository.findById(clubId)
+                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+
+        UserAccount user = userAccountRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        club.getMembers().add(user);
+        sailingClubRepository.save(club);
+
+        Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
+        String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
+
+        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
+    }
+
+    @Transactional
+    public SailingClubResponse leaveClub(String email, Long clubId) {
+        SailingClub club = sailingClubRepository.findById(clubId)
+                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+
+        UserAccount user = userAccountRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        club.getMembers().remove(user);
+        sailingClubRepository.save(club);
+
+        Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
+        String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
+
+        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
+    }
 }

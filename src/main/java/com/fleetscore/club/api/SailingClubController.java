@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -55,6 +56,40 @@ public class SailingClubController {
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
                 "Club admin promoted",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/{clubId}/members")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> joinClub(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long clubId,
+            HttpServletRequest httpRequest
+    ) {
+        String email = jwt.getClaimAsString("email");
+        SailingClubResponse data = sailingClubService.joinClub(email, clubId);
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Joined club",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @DeleteMapping("/{clubId}/members")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> leaveClub(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long clubId,
+            HttpServletRequest httpRequest
+    ) {
+        String email = jwt.getClaimAsString("email");
+        SailingClubResponse data = sailingClubService.leaveClub(email, clubId);
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Left club",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );

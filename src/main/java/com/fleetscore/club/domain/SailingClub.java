@@ -51,4 +51,12 @@ public class SailingClub extends AuditableEntity {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<UserAccount> admins = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "sailing_club_members",
+            joinColumns = @JoinColumn(name = "club_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserAccount> members = new HashSet<>();
 }
