@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -128,9 +129,10 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MeResponse>> me(@AuthenticationPrincipal(expression = "claims['email']") String email,
+    public ResponseEntity<ApiResponse<MeResponse>> me(@AuthenticationPrincipal Jwt jwt,
                                                       Authentication authentication,
                                                       HttpServletRequest httpRequest) {
+        String email = jwt != null ? jwt.getClaimAsString("email") : null;
         if (authentication == null || !authentication.isAuthenticated() || email == null) {
             MeResponse data = new MeResponse(false, null, null, null, null);
             ApiResponse<MeResponse> body = ApiResponse.ok(data, "Anonymous", HttpStatus.OK.value(), httpRequest.getRequestURI());

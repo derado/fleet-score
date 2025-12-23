@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,10 +28,11 @@ public class SailingClubController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<SailingClubResponse>> createClub(
-            @AuthenticationPrincipal(expression = "claims['email']") String email,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateSailingClubRequest request,
             HttpServletRequest httpRequest
     ) {
+        String email = jwt.getClaimAsString("email");
         SailingClubResponse data = sailingClubService.createClub(email, request.name(), request.place(), request.organisationId());
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
@@ -43,11 +45,12 @@ public class SailingClubController {
 
     @PutMapping("/{clubId}/admins")
     public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
-            @AuthenticationPrincipal(expression = "claims['email']") String email,
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long clubId,
             @Valid @RequestBody PromoteClubAdminRequest request,
             HttpServletRequest httpRequest
     ) {
+        String email = jwt.getClaimAsString("email");
         SailingClubResponse data = sailingClubService.promoteAdmin(email, clubId, request.userId());
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,

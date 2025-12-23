@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +26,11 @@ public class ProfileController {
 
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<ProfileResponse>> upsertMyProfile(
-            @AuthenticationPrincipal(expression = "claims['email']") String email,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody UpdateProfileRequest request,
             HttpServletRequest httpRequest
     ) {
+        String email = jwt.getClaimAsString("email");
         Profile profile = userService.upsertProfile(email, request.firstName(), request.lastName());
         ProfileResponse data = new ProfileResponse(email, profile.getFirstName(), profile.getLastName());
         ApiResponse<ProfileResponse> body = ApiResponse.ok(data, "Profile updated", HttpStatus.OK.value(),
