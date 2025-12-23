@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,12 +21,41 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/clubs")
 @RequiredArgsConstructor
 public class SailingClubController {
 
     private final SailingClubService sailingClubService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<SailingClubResponse>>> findAllClubs(HttpServletRequest httpRequest) {
+        List<SailingClubResponse> data = sailingClubService.findAllClubs();
+        ApiResponse<List<SailingClubResponse>> body = ApiResponse.ok(
+                data,
+                "Clubs retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/{clubId}")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> findClubById(
+            @PathVariable Long clubId,
+            HttpServletRequest httpRequest
+    ) {
+        SailingClubResponse data = sailingClubService.findClubById(clubId);
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Club retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<SailingClubResponse>> createClub(

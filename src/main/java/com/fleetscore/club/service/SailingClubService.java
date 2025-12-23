@@ -13,6 +13,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SailingClubService {
@@ -20,6 +22,20 @@ public class SailingClubService {
     private final SailingClubRepository sailingClubRepository;
     private final OrganisationRepository organisationRepository;
     private final UserAccountRepository userAccountRepository;
+
+    @Transactional(readOnly = true)
+    public List<SailingClubResponse> findAllClubs() {
+        return sailingClubRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SailingClubResponse findClubById(Long id) {
+        SailingClub club = sailingClubRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Club not found"));
+        return toResponse(club);
+    }
 
     @Transactional
     public SailingClubResponse createClub(String creatorEmail, String name, String place, Long organisationId) {

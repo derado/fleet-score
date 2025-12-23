@@ -11,12 +11,28 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
     private final UserAccountRepository userAccountRepository;
+
+    @Transactional(readOnly = true)
+    public List<OrganisationResponse> findAllOrganisations() {
+        return organisationRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrganisationResponse findOrganisationById(Long id) {
+        Organisation organisation = organisationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Organisation not found"));
+        return toResponse(organisation);
+    }
 
     @Transactional
     public OrganisationResponse createOrganisation(String creatorEmail, String name) {

@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,12 +20,41 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/organisations")
 @RequiredArgsConstructor
 public class OrganisationController {
 
     private final OrganisationService organisationService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<OrganisationResponse>>> findAllOrganisations(HttpServletRequest httpRequest) {
+        List<OrganisationResponse> data = organisationService.findAllOrganisations();
+        ApiResponse<List<OrganisationResponse>> body = ApiResponse.ok(
+                data,
+                "Organisations retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/{organisationId}")
+    public ResponseEntity<ApiResponse<OrganisationResponse>> findOrganisationById(
+            @PathVariable Long organisationId,
+            HttpServletRequest httpRequest
+    ) {
+        OrganisationResponse data = organisationService.findOrganisationById(organisationId);
+        ApiResponse<OrganisationResponse> body = ApiResponse.ok(
+                data,
+                "Organisation retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrganisationResponse>> createOrganisation(
