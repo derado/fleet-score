@@ -44,7 +44,7 @@ public class UserService {
     @Transactional
     public String registerUser(RegistrationRequest req) {
         if (userRepository.existsByEmail(req.email())) {
-            throw new EmailAlreadyInUseException();
+            throw new EmailAlreadyInUseException(req.email());
         }
         UserAccount user = new UserAccount();
         user.setEmail(req.email());
@@ -101,7 +101,7 @@ public class UserService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         if (userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyInUseException();
+            throw new EmailAlreadyInUseException(email);
         }
         String token = tokenGenerator.generateHexToken(24);
         Invitation inv = new Invitation();
@@ -125,7 +125,7 @@ public class UserService {
             throw new TokenExpiredException("Invitation");
         }
         if (userRepository.existsByEmail(inv.getEmail())) {
-            throw new EmailAlreadyInUseException();
+            throw new EmailAlreadyInUseException(inv.getEmail());
         }
         UserAccount user = new UserAccount();
         user.setEmail(inv.getEmail());

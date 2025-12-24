@@ -8,7 +8,6 @@ import com.fleetscore.user.repository.UserAccountRepository;
 import com.fleetscore.common.exception.DuplicateResourceException;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

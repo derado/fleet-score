@@ -63,7 +63,6 @@ public class AuthService {
         );
         Instant accessExp = tokenService.getExpiryFromNow();
 
-        // issue refresh token
         String rt = tokenGenerator.generateHexToken(48);
         Instant rtExp = Instant.now().plus(refreshTtlDays, ChronoUnit.DAYS);
         RefreshToken refresh = new RefreshToken();
