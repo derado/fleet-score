@@ -32,7 +32,7 @@ public class OrganisationInternalApi {
     }
 
     @Transactional(readOnly = true)
-    public boolean isAdmin(Long organisationId, String email) {
-        return organisationRepository.existsByIdAndAdmins_Email(organisationId, email);
+    public boolean isAdmin(Long organisationId, Long userId) {
+        return organisationRepository.existsByIdAndAdmins_Id(organisationId, userId);
     }
 }

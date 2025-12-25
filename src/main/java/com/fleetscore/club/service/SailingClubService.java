@@ -10,6 +10,7 @@ import com.fleetscore.user.internal.UserInternalApi;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,7 @@ public class SailingClubService {
                 throw new ResourceNotFoundException("Organisation not found");
             }
 
-            boolean isAdmin = organisationApi.isAdmin(organisationId, creator.getEmail());
+            boolean isAdmin = organisationApi.isAdmin(organisationId, creator.getId());
             if (!isAdmin) {
                 throw new AccessDeniedException("Only organisation admins can create clubs for the organisation");
             }
@@ -65,6 +66,7 @@ public class SailingClubService {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isAdmin(principal?.id, #clubId)")
     public SailingClubResponse promoteAdmin(Long clubId, Long newAdminUserId) {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));

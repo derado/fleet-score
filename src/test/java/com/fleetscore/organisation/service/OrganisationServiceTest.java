@@ -7,8 +7,12 @@ import com.fleetscore.user.repository.UserAccountRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +57,9 @@ class OrganisationServiceTest {
 
         var organisationResponse = organisationService.createOrganisation(owner, "National Sailing Org");
 
+        authenticateAs(owner);
         organisationService.promoteAdmin(organisationResponse.id(), other.getId());
+        clearAuthentication();
 
         var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
@@ -81,9 +87,14 @@ class OrganisationServiceTest {
         userAccountRepository.save(target);
 
         var organisationResponse = organisationService.createOrganisation(creator, "Org X");
+
+        authenticateAs(creator);
         organisationService.promoteAdmin(organisationResponse.id(), firstAdmin.getId());
 
+        authenticateAs(firstAdmin);
         organisationService.promoteAdmin(organisationResponse.id(), target.getId());
+
+        clearAuthentication();
 
         var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(org.getAdmins()).extracting(UserAccount::getEmail)
@@ -103,9 +114,21 @@ class OrganisationServiceTest {
         var orgBefore = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         int adminCountBefore = orgBefore.getAdmins().size();
 
+        authenticateAs(admin);
         organisationService.promoteAdmin(organisationResponse.id(), admin.getId());
+        clearAuthentication();
 
         var orgAfter = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         assertThat(orgAfter.getAdmins()).hasSize(adminCountBefore);
+    }
+
+    private static void authenticateAs(UserAccount user) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, "N/A", Collections.emptyList())
+        );
+    }
+
+    private static void clearAuthentication() {
+        SecurityContextHolder.clearContext();
     }
 }

@@ -8,6 +8,7 @@ import com.fleetscore.user.internal.UserInternalApi;
 import com.fleetscore.common.exception.DuplicateResourceException;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,7 @@ public class OrganisationService {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated() and @orgAuthz.isAdmin(principal?.id, #organisationId)")
     public OrganisationResponse promoteAdmin(Long organisationId, Long newAdminUserId) {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));

@@ -75,7 +75,6 @@ public class OrganisationController {
     }
 
     @PutMapping("/{organisationId}/admins")
-    @PreAuthorize("@orgAuthz.isAdmin(authentication.token.claims['email'], #organisationId)")
     public ResponseEntity<ApiResponse<OrganisationResponse>> promoteAdmin(
             @PathVariable Long organisationId,
             @Valid @RequestBody PromoteOrganisationAdminRequest request,

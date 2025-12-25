@@ -10,10 +10,10 @@ public class ClubAuthorizationService {
 
     private final SailingClubRepository sailingClubRepository;
 
-    public boolean isAdmin(String email, Long clubId) {
-        if (email == null || clubId == null) {
+    public boolean isAdmin(Long userId, Long clubId) {
+        if (userId == null || clubId == null) {
             return false;
         }
-        return sailingClubRepository.existsByIdAndAdmins_Email(clubId, email);
+        return sailingClubRepository.existsByIdAndAdmins_Id(clubId, userId);
     }
 }

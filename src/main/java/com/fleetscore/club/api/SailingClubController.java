@@ -76,7 +76,6 @@ public class SailingClubController {
     }
 
     @PutMapping("/{clubId}/admins")
-    @PreAuthorize("@clubAuthz.isAdmin(authentication.token.claims['email'], #clubId)")
     public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
             @PathVariable Long clubId,
             @Valid @RequestBody PromoteClubAdminRequest request,

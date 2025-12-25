@@ -10,9 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -122,7 +126,9 @@ class SailingClubServiceTest {
 
         var clubResponse = sailingClubService.createClub(creator, "Promo Club", "Pula", null);
 
+        authenticateAs(creator);
         sailingClubService.promoteAdmin(clubResponse.id(), other.getId());
+        clearAuthentication();
 
         var club = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         assertThat(club.getAdmins()).extracting(UserAccount::getEmail)
@@ -142,9 +148,21 @@ class SailingClubServiceTest {
         var clubBefore = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         int adminCountBefore = clubBefore.getAdmins().size();
 
+        authenticateAs(admin);
         sailingClubService.promoteAdmin(clubResponse.id(), admin.getId());
+        clearAuthentication();
 
         var clubAfter = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         assertThat(clubAfter.getAdmins()).hasSize(adminCountBefore);
+    }
+
+    private static void authenticateAs(UserAccount user) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, "N/A", Collections.emptyList())
+        );
+    }
+
+    private static void clearAuthentication() {
+        SecurityContextHolder.clearContext();
     }
 }
