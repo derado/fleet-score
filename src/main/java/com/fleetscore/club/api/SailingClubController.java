@@ -10,8 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.fleetscore.user.domain.UserAccount;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,12 +61,11 @@ public class SailingClubController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> createClub(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal UserAccount currentUser,
             @Valid @RequestBody CreateSailingClubRequest request,
             HttpServletRequest httpRequest
     ) {
-        String email = jwt.getClaimAsString("email");
-        SailingClubResponse data = sailingClubService.createClub(email, request.name(), request.place(), request.organisationId());
+        SailingClubResponse data = sailingClubService.createClub(currentUser, request.name(), request.place(), request.organisationId());
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
                 "Sailing club created",
@@ -96,12 +95,11 @@ public class SailingClubController {
     @PostMapping("/{clubId}/members")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> joinClub(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal UserAccount currentUser,
             @PathVariable Long clubId,
             HttpServletRequest httpRequest
     ) {
-        String email = jwt.getClaimAsString("email");
-        SailingClubResponse data = sailingClubService.joinClub(email, clubId);
+        SailingClubResponse data = sailingClubService.joinClub(currentUser, clubId);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
                 "Joined club",
@@ -114,12 +112,11 @@ public class SailingClubController {
     @DeleteMapping("/{clubId}/members")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> leaveClub(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal UserAccount currentUser,
             @PathVariable Long clubId,
             HttpServletRequest httpRequest
     ) {
-        String email = jwt.getClaimAsString("email");
-        SailingClubResponse data = sailingClubService.leaveClub(email, clubId);
+        SailingClubResponse data = sailingClubService.leaveClub(currentUser, clubId);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
                 "Left club",

@@ -29,7 +29,7 @@ class OrganisationServiceTest {
         creator.setEmailVerified(true);
         userAccountRepository.save(creator);
 
-        var organisationResponse = organisationService.createOrganisation("owner@example.com", "Sailing Association");
+        var organisationResponse = organisationService.createOrganisation(creator, "Sailing Association");
         assertThat(organisationResponse.id()).isNotNull();
 
         var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
@@ -51,7 +51,7 @@ class OrganisationServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var organisationResponse = organisationService.createOrganisation("owner2@example.com", "National Sailing Org");
+        var organisationResponse = organisationService.createOrganisation(owner, "National Sailing Org");
 
         organisationService.promoteAdmin(organisationResponse.id(), other.getId());
 
@@ -80,7 +80,7 @@ class OrganisationServiceTest {
         target.setEmailVerified(true);
         userAccountRepository.save(target);
 
-        var organisationResponse = organisationService.createOrganisation("creator@example.com", "Org X");
+        var organisationResponse = organisationService.createOrganisation(creator, "Org X");
         organisationService.promoteAdmin(organisationResponse.id(), firstAdmin.getId());
 
         organisationService.promoteAdmin(organisationResponse.id(), target.getId());
@@ -98,7 +98,7 @@ class OrganisationServiceTest {
         admin.setEmailVerified(true);
         userAccountRepository.save(admin);
 
-        var organisationResponse = organisationService.createOrganisation("admin@example.com", "Test Org");
+        var organisationResponse = organisationService.createOrganisation(admin, "Test Org");
 
         var orgBefore = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         int adminCountBefore = orgBefore.getAdmins().size();

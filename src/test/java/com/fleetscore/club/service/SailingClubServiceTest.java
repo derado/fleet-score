@@ -39,7 +39,7 @@ class SailingClubServiceTest {
         userAccountRepository.save(user);
 
         // when
-        var resp = sailingClubService.createClub("clubber@example.com", "Local Club", "Split", null);
+        var resp = sailingClubService.createClub(user, "Local Club", "Split", null);
 
         // then
         assertThat(resp.id()).isNotNull();
@@ -56,10 +56,10 @@ class SailingClubServiceTest {
         owner.setEmailVerified(true);
         userAccountRepository.save(owner);
 
-        var org = organisationService.createOrganisation("ownerclub@example.com", "Org For Club");
+        var org = organisationService.createOrganisation(owner, "Org For Club");
 
         // when
-        var resp = sailingClubService.createClub("ownerclub@example.com", "Org Club", "Zadar", org.id());
+        var resp = sailingClubService.createClub(owner, "Org Club", "Zadar", org.id());
 
         // then
         assertThat(resp.organisationId()).isEqualTo(org.id());
@@ -83,11 +83,11 @@ class SailingClubServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var org = organisationService.createOrganisation("ownerclub2@example.com", "Org For Club 2");
+        var org = organisationService.createOrganisation(owner, "Org For Club 2");
 
         // when / then
         assertThrows(AccessDeniedException.class,
-                () -> sailingClubService.createClub("nonadmin@example.com", "Forbidden Club", "Rijeka", org.id()));
+                () -> sailingClubService.createClub(other, "Forbidden Club", "Rijeka", org.id()));
 
         assertThat(organisationRepository.findById(org.id())).isPresent();
     }
@@ -100,7 +100,7 @@ class SailingClubServiceTest {
         user.setEmailVerified(true);
         userAccountRepository.save(user);
 
-        var clubResponse = sailingClubService.createClub("clubcreator@example.com", "Admin Club", "Dubrovnik", null);
+        var clubResponse = sailingClubService.createClub(user, "Admin Club", "Dubrovnik", null);
 
         var club = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         assertThat(club.getAdmins()).extracting(UserAccount::getEmail).contains("clubcreator@example.com");
@@ -120,7 +120,7 @@ class SailingClubServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var clubResponse = sailingClubService.createClub("clubadmin@example.com", "Promo Club", "Pula", null);
+        var clubResponse = sailingClubService.createClub(creator, "Promo Club", "Pula", null);
 
         sailingClubService.promoteAdmin(clubResponse.id(), other.getId());
 
@@ -137,7 +137,7 @@ class SailingClubServiceTest {
         admin.setEmailVerified(true);
         userAccountRepository.save(admin);
 
-        var clubResponse = sailingClubService.createClub("dupeadmin@example.com", "Dupe Club", "Trogir", null);
+        var clubResponse = sailingClubService.createClub(admin, "Dupe Club", "Trogir", null);
 
         var clubBefore = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         int adminCountBefore = clubBefore.getAdmins().size();

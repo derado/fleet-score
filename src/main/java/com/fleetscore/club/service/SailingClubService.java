@@ -38,7 +38,7 @@ public class SailingClubService {
     }
 
     @Transactional
-    public SailingClubResponse createClub(String creatorEmail, String name, String place, Long organisationId) {
+    public SailingClubResponse createClub(UserAccount creator, String name, String place, Long organisationId) {
         Organisation organisation = null;
 
         if (organisationId != null) {
@@ -46,15 +46,13 @@ public class SailingClubService {
                 throw new ResourceNotFoundException("Organisation not found");
             }
 
-            boolean isAdmin = organisationApi.isAdmin(organisationId, creatorEmail);
+            boolean isAdmin = organisationApi.isAdmin(organisationId, creator.getEmail());
             if (!isAdmin) {
                 throw new AccessDeniedException("Only organisation admins can create clubs for the organisation");
             }
 
             organisation = organisationApi.findById(organisationId);
         }
-
-        UserAccount creator = userApi.findByEmail(creatorEmail);
 
         SailingClub club = new SailingClub();
         club.setName(name);
@@ -78,11 +76,9 @@ public class SailingClubService {
     }
 
     @Transactional
-    public SailingClubResponse joinClub(String email, Long clubId) {
+    public SailingClubResponse joinClub(UserAccount user, Long clubId) {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
-
-        UserAccount user = userApi.findByEmail(email);
 
         club.getMembers().add(user);
         sailingClubRepository.save(club);
@@ -90,11 +86,9 @@ public class SailingClubService {
     }
 
     @Transactional
-    public SailingClubResponse leaveClub(String email, Long clubId) {
+    public SailingClubResponse leaveClub(UserAccount user, Long clubId) {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
-
-        UserAccount user = userApi.findByEmail(email);
 
         club.getMembers().remove(user);
         sailingClubRepository.save(club);

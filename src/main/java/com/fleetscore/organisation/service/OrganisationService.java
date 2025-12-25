@@ -35,12 +35,10 @@ public class OrganisationService {
     }
 
     @Transactional
-    public OrganisationResponse createOrganisation(String creatorEmail, String name) {
+    public OrganisationResponse createOrganisation(UserAccount creator, String name) {
         if (organisationRepository.existsByName(name)) {
             throw new DuplicateResourceException("Organisation", "name", name);
         }
-
-        UserAccount creator = userApi.findByEmail(creatorEmail);
 
         Organisation organisation = new Organisation();
         organisation.setName(name);

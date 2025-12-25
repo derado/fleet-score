@@ -1,0 +1,26 @@
+package com.fleetscore.security;
+
+import com.fleetscore.user.domain.UserAccount;
+import com.fleetscore.user.internal.UserInternalApi;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+
+@Component
+@RequiredArgsConstructor
+public class UserAccountJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    private final UserInternalApi userInternalApi;
+
+    @Override
+    public AbstractAuthenticationToken convert(Jwt jwt) {
+        String email = jwt.getClaimAsString("email");
+        UserAccount user = userInternalApi.findByEmailOptional(email).orElse(null);
+        return new UsernamePasswordAuthenticationToken(user, jwt, Collections.emptyList());
+    }
+}
