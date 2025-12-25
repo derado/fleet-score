@@ -1,6 +1,6 @@
 package com.fleetscore.user.service;
 
-import com.fleetscore.security.TokenService;
+import com.fleetscore.user.security.TokenService;
 import com.fleetscore.user.api.dto.LoginRequest;
 import com.fleetscore.user.api.dto.TokenResponse;
 import com.fleetscore.user.domain.RefreshToken;
