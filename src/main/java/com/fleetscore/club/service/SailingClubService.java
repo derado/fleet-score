@@ -4,9 +4,9 @@ import com.fleetscore.club.api.dto.SailingClubResponse;
 import com.fleetscore.club.domain.SailingClub;
 import com.fleetscore.club.repository.SailingClubRepository;
 import com.fleetscore.organisation.domain.Organisation;
-import com.fleetscore.organisation.repository.OrganisationRepository;
+import com.fleetscore.organisation.internal.OrganisationInternalApi;
 import com.fleetscore.user.domain.UserAccount;
-import com.fleetscore.user.repository.UserAccountRepository;
+import com.fleetscore.user.internal.UserInternalApi;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,8 +20,8 @@ import java.util.List;
 public class SailingClubService {
 
     private final SailingClubRepository sailingClubRepository;
-    private final OrganisationRepository organisationRepository;
-    private final UserAccountRepository userAccountRepository;
+    private final OrganisationInternalApi organisationApi;
+    private final UserInternalApi userApi;
 
     @Transactional(readOnly = true)
     public List<SailingClubResponse> findAllClubs() {
@@ -42,20 +42,19 @@ public class SailingClubService {
         Organisation organisation = null;
 
         if (organisationId != null) {
-            if (!organisationRepository.existsById(organisationId)) {
+            if (!organisationApi.existsById(organisationId)) {
                 throw new ResourceNotFoundException("Organisation not found");
             }
 
-            boolean isAdmin = organisationRepository.existsByIdAndAdmins_Email(organisationId, creatorEmail);
+            boolean isAdmin = organisationApi.isAdmin(organisationId, creatorEmail);
             if (!isAdmin) {
                 throw new AccessDeniedException("Only organisation admins can create clubs for the organisation");
             }
 
-            organisation = organisationRepository.findById(organisationId).orElseThrow();
+            organisation = organisationApi.findById(organisationId);
         }
 
-        UserAccount creator = userAccountRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserAccount creator = userApi.findByEmail(creatorEmail);
 
         SailingClub club = new SailingClub();
         club.setName(name);
@@ -72,8 +71,7 @@ public class SailingClubService {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
 
-        UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserAccount newAdmin = userApi.findById(newAdminUserId);
 
         club.getAdmins().add(newAdmin);
         return toResponse(club);
@@ -84,8 +82,7 @@ public class SailingClubService {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
 
-        UserAccount user = userAccountRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserAccount user = userApi.findByEmail(email);
 
         club.getMembers().add(user);
         sailingClubRepository.save(club);
@@ -97,8 +94,7 @@ public class SailingClubService {
         SailingClub club = sailingClubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
 
-        UserAccount user = userAccountRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserAccount user = userApi.findByEmail(email);
 
         club.getMembers().remove(user);
         sailingClubRepository.save(club);

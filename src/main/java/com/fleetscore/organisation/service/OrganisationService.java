@@ -4,7 +4,7 @@ import com.fleetscore.organisation.api.dto.OrganisationResponse;
 import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.user.domain.UserAccount;
-import com.fleetscore.user.repository.UserAccountRepository;
+import com.fleetscore.user.internal.UserInternalApi;
 import com.fleetscore.common.exception.DuplicateResourceException;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.List;
 public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
-    private final UserAccountRepository userAccountRepository;
+    private final UserInternalApi userApi;
 
     @Transactional(readOnly = true)
     public List<OrganisationResponse> findAllOrganisations() {
@@ -40,8 +40,7 @@ public class OrganisationService {
             throw new DuplicateResourceException("Organisation", "name", name);
         }
 
-        UserAccount creator = userAccountRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserAccount creator = userApi.findByEmail(creatorEmail);
 
         Organisation organisation = new Organisation();
         organisation.setName(name);
@@ -56,8 +55,7 @@ public class OrganisationService {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
 
-        UserAccount newAdmin = userAccountRepository.findById(newAdminUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserAccount newAdmin = userApi.findById(newAdminUserId);
 
         organisation.getAdmins().add(newAdmin);
         return toResponse(organisation);
