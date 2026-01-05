@@ -2,9 +2,7 @@ package com.fleetscore.club.service;
 
 import com.fleetscore.club.repository.SailingClubRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-@Service("clubAuthz")
 @RequiredArgsConstructor
 public class ClubAuthorizationService {
 

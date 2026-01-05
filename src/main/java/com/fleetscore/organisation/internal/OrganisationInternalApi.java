@@ -4,12 +4,8 @@ import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
-@Service
 @RequiredArgsConstructor
 public class OrganisationInternalApi {
 
@@ -19,11 +15,6 @@ public class OrganisationInternalApi {
     public Organisation findById(Long id) {
         return organisationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Organisation> findByIdOptional(Long id) {
-        return organisationRepository.findById(id);
     }
 
     @Transactional(readOnly = true)

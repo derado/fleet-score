@@ -17,13 +17,11 @@ import com.fleetscore.common.util.TokenGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-@Service
 @RequiredArgsConstructor
 public class UserService {
 

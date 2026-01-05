@@ -8,11 +8,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
-@Component
 @RequiredArgsConstructor
 public class UserAccountJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 

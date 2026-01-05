@@ -34,7 +34,7 @@ public class JpaAuditingConfig {
 
             if (principal instanceof UserDetails userDetails) {
                 String username = userDetails.getUsername();
-                if (username != null && !username.isBlank()) {
+                if (!username.isBlank()) {
                     return Optional.of(username);
                 }
             }

@@ -1,12 +1,10 @@
 package com.fleetscore.common.util;
 
-import org.springframework.stereotype.Component;
 import org.springframework.modulith.NamedInterface;
 
 import java.security.SecureRandom;
 import java.util.HexFormat;
 
-@Component
 @NamedInterface
 public class TokenGenerator {
     private final SecureRandom random = new SecureRandom();

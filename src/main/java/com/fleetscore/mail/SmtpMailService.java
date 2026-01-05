@@ -2,15 +2,11 @@ package com.fleetscore.mail;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "app.mail.enabled", havingValue = "true")
-public class SmtpMailService implements MailService {
+class SmtpMailService implements MailService {
 
     private final JavaMailSender mailSender;
 

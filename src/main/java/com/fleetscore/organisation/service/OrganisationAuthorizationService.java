@@ -2,9 +2,7 @@ package com.fleetscore.organisation.service;
 
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-@Service("orgAuthz")
 @RequiredArgsConstructor
 public class OrganisationAuthorizationService {
 
