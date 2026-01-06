@@ -5,10 +5,9 @@ import com.fleetscore.club.internal.ClubInternalApi;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.internal.OrganisationInternalApi;
-import com.fleetscore.regatta.api.dto.CreateRegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaFilter;
+import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
-import com.fleetscore.regatta.api.dto.UpdateRegattaRequest;
 import com.fleetscore.regatta.domain.Regatta;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegattaSpecification;
@@ -48,30 +47,9 @@ public class RegattaService {
     }
 
     @Transactional
-    public RegattaResponse createRegatta(UserAccount creator, CreateRegattaRequest request) {
+    public RegattaResponse createRegatta(UserAccount creator, RegattaRequest request) {
         Regatta regatta = new Regatta();
-        regatta.setName(request.name());
-        regatta.setStartDate(request.startDate());
-        regatta.setEndDate(request.endDate());
-        regatta.setVenue(request.venue());
-
-        Set<SailingClass> sailingClasses = request.sailingClassIds().stream()
-                .map(sailingClassApi::findById)
-                .collect(Collectors.toSet());
-        regatta.setSailingClasses(sailingClasses);
-
-        if (request.organiserClubIds() != null && !request.organiserClubIds().isEmpty()) {
-            Set<SailingClub> organisers = request.organiserClubIds().stream()
-                    .map(clubApi::findById)
-                    .collect(Collectors.toSet());
-            regatta.setOrganisers(organisers);
-        }
-
-        if (request.organisationId() != null) {
-            Organisation organisation = organisationApi.findById(request.organisationId());
-            regatta.setOrganisation(organisation);
-        }
-
+        applyRequest(regatta, request);
         regatta.getAdmins().add(creator);
 
         Regatta saved = regattaRepository.save(regatta);
@@ -80,36 +58,11 @@ public class RegattaService {
 
     @Transactional
     @PreAuthorize("isAuthenticated() and @regattaAuthz.isAdmin(principal?.id, #regattaId)")
-    public RegattaResponse updateRegatta(Long regattaId, UpdateRegattaRequest request) {
+    public RegattaResponse updateRegatta(Long regattaId, RegattaRequest request) {
         Regatta regatta = regattaRepository.findById(regattaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Regatta not found"));
 
-        regatta.setName(request.name());
-        regatta.setStartDate(request.startDate());
-        regatta.setEndDate(request.endDate());
-        regatta.setVenue(request.venue());
-
-        Set<SailingClass> sailingClasses = request.sailingClassIds().stream()
-                .map(sailingClassApi::findById)
-                .collect(Collectors.toSet());
-        regatta.setSailingClasses(sailingClasses);
-
-        if (request.organiserClubIds() != null && !request.organiserClubIds().isEmpty()) {
-            Set<SailingClub> organisers = request.organiserClubIds().stream()
-                    .map(clubApi::findById)
-                    .collect(Collectors.toSet());
-            regatta.setOrganisers(organisers);
-        } else {
-            regatta.getOrganisers().clear();
-        }
-
-        if (request.organisationId() != null) {
-            Organisation organisation = organisationApi.findById(request.organisationId());
-            regatta.setOrganisation(organisation);
-        } else {
-            regatta.setOrganisation(null);
-        }
-
+        applyRequest(regatta, request);
         return toResponse(regatta);
     }
 
@@ -123,6 +76,32 @@ public class RegattaService {
 
         regatta.getAdmins().add(newAdmin);
         return toResponse(regatta);
+    }
+
+    private void applyRequest(Regatta regatta, RegattaRequest request) {
+        regatta.setName(request.name());
+        regatta.setStartDate(request.startDate());
+        regatta.setEndDate(request.endDate());
+        regatta.setVenue(request.venue());
+
+        Set<SailingClass> sailingClasses = request.sailingClassIds().stream()
+                .map(sailingClassApi::findById)
+                .collect(Collectors.toSet());
+        regatta.setSailingClasses(sailingClasses);
+
+        regatta.getOrganisers().clear();
+        if (request.organiserClubIds() != null && !request.organiserClubIds().isEmpty()) {
+            Set<SailingClub> organisers = request.organiserClubIds().stream()
+                    .map(clubApi::findById)
+                    .collect(Collectors.toSet());
+            regatta.setOrganisers(organisers);
+        }
+
+        regatta.setOrganisation(null);
+        if (request.organisationId() != null) {
+            Organisation organisation = organisationApi.findById(request.organisationId());
+            regatta.setOrganisation(organisation);
+        }
     }
 
     private RegattaResponse toResponse(Regatta regatta) {

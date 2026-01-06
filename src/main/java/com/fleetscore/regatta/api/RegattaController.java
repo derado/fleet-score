@@ -1,11 +1,10 @@
 package com.fleetscore.regatta.api;
 
 import com.fleetscore.common.api.ApiResponse;
-import com.fleetscore.regatta.api.dto.CreateRegattaRequest;
 import com.fleetscore.regatta.api.dto.PromoteRegattaAdminRequest;
 import com.fleetscore.regatta.api.dto.RegattaFilter;
+import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
-import com.fleetscore.regatta.api.dto.UpdateRegattaRequest;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.user.domain.UserAccount;
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,7 +74,7 @@ public class RegattaController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RegattaResponse>> createRegatta(
             @AuthenticationPrincipal UserAccount currentUser,
-            @Valid @RequestBody CreateRegattaRequest request,
+            @Valid @RequestBody RegattaRequest request,
             HttpServletRequest httpRequest
     ) {
         RegattaResponse data = regattaService.createRegatta(currentUser, request);
@@ -91,7 +90,7 @@ public class RegattaController {
     @PutMapping("/{regattaId}")
     public ResponseEntity<ApiResponse<RegattaResponse>> updateRegatta(
             @PathVariable Long regattaId,
-            @Valid @RequestBody UpdateRegattaRequest request,
+            @Valid @RequestBody RegattaRequest request,
             HttpServletRequest httpRequest
     ) {
         RegattaResponse data = regattaService.updateRegatta(regattaId, request);

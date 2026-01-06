@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Set;
 
-public record CreateRegattaRequest(
+public record RegattaRequest(
         @NotBlank @Size(max = 200) String name,
         @NotNull LocalDate startDate,
         @NotNull LocalDate endDate,
