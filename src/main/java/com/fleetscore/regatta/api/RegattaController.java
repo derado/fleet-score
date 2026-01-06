@@ -3,6 +3,7 @@ package com.fleetscore.regatta.api;
 import com.fleetscore.common.api.ApiResponse;
 import com.fleetscore.regatta.api.dto.CreateRegattaRequest;
 import com.fleetscore.regatta.api.dto.PromoteRegattaAdminRequest;
+import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
 import com.fleetscore.regatta.api.dto.UpdateRegattaRequest;
 import com.fleetscore.regatta.service.RegattaService;
@@ -14,14 +15,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,8 +36,17 @@ public class RegattaController {
     private final RegattaService regattaService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<RegattaResponse>>> findAllRegattas(HttpServletRequest httpRequest) {
-        List<RegattaResponse> data = regattaService.findAllRegattas();
+    public ResponseEntity<ApiResponse<List<RegattaResponse>>> findAllRegattas(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) String venue,
+            @RequestParam(required = false) String sailingClass,
+            @RequestParam(required = false) String organiser,
+            @RequestParam(required = false) String organisation,
+            HttpServletRequest httpRequest
+    ) {
+        RegattaFilter filter = new RegattaFilter(name, startDate, venue, sailingClass, organiser, organisation);
+        List<RegattaResponse> data = regattaService.findAllRegattas(filter);
         ApiResponse<List<RegattaResponse>> body = ApiResponse.ok(
                 data,
                 "Regattas retrieved",

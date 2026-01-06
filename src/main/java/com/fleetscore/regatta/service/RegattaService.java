@@ -6,10 +6,12 @@ import com.fleetscore.common.exception.ResourceNotFoundException;
 import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.internal.OrganisationInternalApi;
 import com.fleetscore.regatta.api.dto.CreateRegattaRequest;
+import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
 import com.fleetscore.regatta.api.dto.UpdateRegattaRequest;
 import com.fleetscore.regatta.domain.Regatta;
 import com.fleetscore.regatta.repository.RegattaRepository;
+import com.fleetscore.regatta.repository.RegattaSpecification;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import com.fleetscore.user.domain.UserAccount;
@@ -32,8 +34,8 @@ public class RegattaService {
     private final UserInternalApi userApi;
 
     @Transactional(readOnly = true)
-    public List<RegattaResponse> findAllRegattas() {
-        return regattaRepository.findAll().stream()
+    public List<RegattaResponse> findAllRegattas(RegattaFilter filter) {
+        return regattaRepository.findAll(RegattaSpecification.withFilter(filter)).stream()
                 .map(this::toResponse)
                 .toList();
     }
