@@ -31,6 +31,9 @@
     { "key": "clubPlace", "value": "Split" },
     { "key": "clubId", "value": "" },
     { "key": "clubAdminUserId", "value": "" },
+    { "key": "regattaId", "value": "" },
+    { "key": "regattaAdminUserId", "value": "" },
+    { "key": "sailingClassId", "value": "" },
     { "key": "apiVersion", "value": "" },
     { "key": "verificationToken", "value": "" },
     { "key": "invitationToken", "value": "" },
@@ -297,6 +300,28 @@
       "name": "Organisation",
       "item": [
         {
+          "name": "List All Organisations",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/organisations", "host": ["{{baseUrl}}"], "path": ["api","organisations"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List organisations returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Organisation by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/organisations/{{organisationId}}", "host": ["{{baseUrl}}"], "path": ["api","organisations","{{organisationId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get organisation returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
           "name": "Create Organisation",
           "request": {
             "method": "POST",
@@ -356,6 +381,28 @@
     {
       "name": "Clubs",
       "item": [
+        {
+          "name": "List All Clubs",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List clubs returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Club by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/clubs/{{clubId}}", "host": ["{{baseUrl}}"], "path": ["api","clubs","{{clubId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get club returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
         {
           "name": "Create Club (no organisation)",
           "request": {
@@ -436,6 +483,162 @@
               }
             }
           ]
+        },
+        {
+          "name": "Join Club",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/clubs/{{clubId}}/members", "host": ["{{baseUrl}}"], "path": ["api","clubs","{{clubId}}","members"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Join club returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Leave Club",
+          "request": {
+            "method": "DELETE",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/clubs/{{clubId}}/members", "host": ["{{baseUrl}}"], "path": ["api","clubs","{{clubId}}","members"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Leave club returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        }
+      ]
+    },
+    {
+      "name": "Sailing Classes",
+      "item": [
+        {
+          "name": "List All Sailing Classes",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/sailing-classes", "host": ["{{baseUrl}}"], "path": ["api","sailing-classes"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List sailing classes returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Sailing Class by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/sailing-classes/{{sailingClassId}}", "host": ["{{baseUrl}}"], "path": ["api","sailing-classes","{{sailingClassId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get sailing class returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        }
+      ]
+    },
+    {
+      "name": "Regattas",
+      "item": [
+        {
+          "name": "List All Regattas",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regattas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","regattas"],
+              "query": [
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "startDate", "value": "", "disabled": true },
+                { "key": "venue", "value": "", "disabled": true },
+                { "key": "sailingClass", "value": "", "disabled": true },
+                { "key": "organiser", "value": "", "disabled": true },
+                { "key": "organisation", "value": "", "disabled": true }
+              ]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List regattas returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Regatta by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get regatta returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Create Regatta",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas", "host": ["{{baseUrl}}"], "path": ["api","regattas"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Regatta 2026\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-05\",\n  \"venue\": \"Split Marina\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create regatta returns 201', function () { pm.response.to.have.status(201); });",
+                  "var j = pm.response.json(); if (j && j.data && j.data.id) { pm.collectionVariables.set('regattaId', j.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Regatta",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Regatta 2026 - Updated\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-06\",\n  \"venue\": \"Split Marina\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Update regatta returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Promote Regatta Admin",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/admins", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","admins"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{regattaAdminUserId}}\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Promote regatta admin returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
         }
       ]
     }
