@@ -22,8 +22,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 
+@Tag(name = "Authentication", description = "User registration, login, and authentication operations")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
