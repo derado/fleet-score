@@ -10,7 +10,7 @@ import java.util.List;
 public interface SailingNationRepository extends JpaRepository<SailingNation, Long> {
 
     @Query("SELECT sn FROM SailingNation sn WHERE " +
-           "(:code IS NULL OR LOWER(sn.code) LIKE LOWER(CONCAT('%', :code, '%'))) AND " +
-           "(:country IS NULL OR LOWER(sn.country) LIKE LOWER(CONCAT('%', :country, '%')))")
+           "(:code IS NULL OR LOWER(sn.code) LIKE LOWER(CONCAT('%', CAST(:code AS string), '%'))) AND " +
+           "(:country IS NULL OR LOWER(sn.country) LIKE LOWER(CONCAT('%', CAST(:country AS string), '%')))")
     List<SailingNation> findAllWithFilters(@Param("code") String code, @Param("country") String country);
 }
