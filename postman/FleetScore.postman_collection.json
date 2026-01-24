@@ -34,6 +34,7 @@
     { "key": "regattaId", "value": "" },
     { "key": "regattaAdminUserId", "value": "" },
     { "key": "sailingClassId", "value": "" },
+    { "key": "sailingNationId", "value": "" },
     { "key": "apiVersion", "value": "" },
     { "key": "verificationToken", "value": "" },
     { "key": "invitationToken", "value": "" },
@@ -506,6 +507,41 @@
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Leave club returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        }
+      ]
+    },
+    {
+      "name": "Sailing Nations",
+      "item": [
+        {
+          "name": "List All Sailing Nations",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sailing-nations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","sailing-nations"],
+              "query": [
+                { "key": "code", "value": "", "disabled": true },
+                { "key": "country", "value": "", "disabled": true }
+              ]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List sailing nations returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Sailing Nation by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/sailing-nations/{{sailingNationId}}", "host": ["{{baseUrl}}"], "path": ["api","sailing-nations","{{sailingNationId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get sailing nation returns 200', function () { pm.response.to.have.status(200); });"
           ] } } ]
         }
       ]
