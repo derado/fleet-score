@@ -12,6 +12,11 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data/sailing_nations.sql
   mail:
     host: ${MAIL_HOST:}
     port: ${MAIL_PORT:0}
