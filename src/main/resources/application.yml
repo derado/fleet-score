@@ -16,7 +16,7 @@ spring:
   sql:
     init:
       mode: always
-      data-locations: classpath:data/sailing_nations.sql
+      data-locations: classpath:data/sailing_nations.sql,classpath:data/sailing_classes.sql
   mail:
     host: ${MAIL_HOST:}
     port: ${MAIL_PORT:0}

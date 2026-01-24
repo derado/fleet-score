@@ -1,3 +1,5 @@
+delete from sailing_nations;
+
 INSERT INTO sailing_nations (id, code, country)
 VALUES (1, 'ALG', 'Algeria'),
        (2, 'ASA', 'American Samoa'),

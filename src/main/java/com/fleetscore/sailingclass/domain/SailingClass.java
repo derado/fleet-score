@@ -1,12 +1,9 @@
 package com.fleetscore.sailingclass.domain;
 
-import com.fleetscore.common.persistence.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -21,14 +18,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SailingClass extends AuditableEntity {
+public class SailingClass {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 36)
+    private String worldSailingId;
+
+    @Column(nullable = false, length = 50)
     private String name;
+
+    @Column(length = 10)
+    private String classCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -37,4 +39,37 @@ public class SailingClass extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private WorldSailingStatus worldSailingStatus;
+
+    @Column(length = 50)
+    private String numberOfCrew;
+
+    @Column(length = 50)
+    private String numberOfTrapeze;
+
+    @Column(length = 20)
+    private String optimalCrewWeight;
+
+    @Column(length = 30)
+    private String hullLength;
+
+    @Column(length = 50)
+    private String beamLength;
+
+    @Column(length = 30)
+    private String boatWeight;
+
+    @Column(length = 30)
+    private String headsailArea;
+
+    @Column(length = 50)
+    private String mainsailArea;
+
+    @Column(length = 50)
+    private String spinnakerArea;
+
+    @Column(length = 50)
+    private String classDesigner;
+
+    @Column(length = 20)
+    private String yearDesigned;
 }

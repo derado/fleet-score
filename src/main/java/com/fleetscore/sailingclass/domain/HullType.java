@@ -1,7 +1,7 @@
 package com.fleetscore.sailingclass.domain;
 
 public enum HullType {
-    DINGHY,
+    CENTREBOARD,
     KEELBOAT,
     MULTIHULL,
     YACHT,
