@@ -184,16 +184,17 @@ public class UserService {
     @Transactional(readOnly = true)
     public MeResponse getCurrentUser(String email) {
         if (email == null) {
-            return new MeResponse(false, null, null, null, null);
+            return new MeResponse(false, null, null, null, null, false);
         }
 
         return userRepository.findByEmail(email)
                 .map(user -> {
                     Profile profile = profileRepository.findByUser(user).orElse(null);
-                    String firstName = profile != null ? profile.getFirstName() : null;
-                    String lastName = profile != null ? profile.getLastName() : null;
-                    return new MeResponse(true, email, firstName, lastName, user.isEmailVerified());
+                    boolean profileCreated = profile != null;
+                    String firstName = profileCreated ? profile.getFirstName() : null;
+                    String lastName = profileCreated ? profile.getLastName() : null;
+                    return new MeResponse(true, email, firstName, lastName, user.isEmailVerified(), profileCreated);
                 })
-                .orElse(new MeResponse(false, null, null, null, null));
+                .orElse(new MeResponse(false, null, null, null, null, false));
     }
 }

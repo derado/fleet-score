@@ -5,5 +5,6 @@ public record MeResponse(
         String email,
         String firstName,
         String lastName,
-        Boolean emailVerified
+        Boolean emailVerified,
+        boolean profileCreated
 ) {}
