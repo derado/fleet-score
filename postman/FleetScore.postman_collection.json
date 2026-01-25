@@ -685,6 +685,47 @@
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('Promote regatta admin returns 200', function () { pm.response.to.have.status(200); });"
           ] } } ]
+        },
+        {
+          "name": "Create Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/registrations", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","registrations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sailorName\": \"John Doe\",\n  \"yearOfBirth\": 1990,\n  \"gender\": \"M\",\n  \"sailingClubName\": \"Local Sailing Club\",\n  \"sailingClubId\": null,\n  \"sailingClassId\": 1,\n  \"sailingNationId\": 1,\n  \"sailNumber\": 123\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Create registration returns 201', function () { pm.response.to.have.status(201); });"
+          ] } } ]
+        },
+        {
+          "name": "List Registrations by Regatta",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/registrations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","regattas","{{regattaId}}","registrations"],
+              "query": [
+                { "key": "sailingClassId", "value": "", "disabled": true },
+                { "key": "sailingNationId", "value": "", "disabled": true },
+                { "key": "sailorName", "value": "", "disabled": true },
+                { "key": "sailingClubName", "value": "", "disabled": true },
+                { "key": "sailNumber", "value": "", "disabled": true },
+                { "key": "gender", "value": "", "disabled": true }
+              ]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List registrations returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
         }
       ]
     }

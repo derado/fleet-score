@@ -4,9 +4,12 @@ import com.fleetscore.club.internal.ClubInternalApi;
 import com.fleetscore.organisation.internal.OrganisationInternalApi;
 import com.fleetscore.regatta.internal.RegattaInternalApi;
 import com.fleetscore.regatta.repository.RegattaRepository;
+import com.fleetscore.regatta.repository.RegistrationRepository;
 import com.fleetscore.regatta.service.RegattaAuthorizationService;
 import com.fleetscore.regatta.service.RegattaService;
+import com.fleetscore.regatta.service.RegistrationService;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
+import com.fleetscore.sailingnation.internal.SailingNationInternalApi;
 import com.fleetscore.user.internal.UserInternalApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,5 +35,15 @@ public class RegattaConfig {
             OrganisationInternalApi organisationApi,
             UserInternalApi userApi) {
         return new RegattaService(regattaRepository, sailingClassApi, clubApi, organisationApi, userApi);
+    }
+
+    @Bean
+    RegistrationService registrationService(
+            RegistrationRepository registrationRepository,
+            RegattaRepository regattaRepository,
+            SailingClassInternalApi sailingClassApi,
+            SailingNationInternalApi sailingNationApi,
+            ClubInternalApi clubApi) {
+        return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi);
     }
 }
