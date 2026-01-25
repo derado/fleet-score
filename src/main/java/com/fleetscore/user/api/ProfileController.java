@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.fleetscore.user.domain.UserAccount;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,11 +30,11 @@ public class ProfileController {
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ProfileResponse>> upsertMyProfile(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal UserAccount currentUser,
             @Valid @RequestBody UpdateProfileRequest request,
             HttpServletRequest httpRequest
     ) {
-        String email = jwt.getClaimAsString("email");
+        String email = currentUser.getEmail();
         Profile profile = userService.upsertProfile(email, request.firstName(), request.lastName());
         ProfileResponse data = new ProfileResponse(email, profile.getFirstName(), profile.getLastName());
         ApiResponse<ProfileResponse> body = ApiResponse.ok(data, "Profile updated", HttpStatus.OK.value(),

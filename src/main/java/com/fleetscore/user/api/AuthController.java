@@ -19,8 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.fleetscore.user.domain.UserAccount;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -125,12 +124,9 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MeResponse>> me(@AuthenticationPrincipal Jwt jwt,
-                                                      Authentication authentication,
+    public ResponseEntity<ApiResponse<MeResponse>> me(@AuthenticationPrincipal UserAccount user,
                                                       HttpServletRequest httpRequest) {
-        String email = (jwt != null && authentication != null && authentication.isAuthenticated())
-                ? jwt.getClaimAsString("email")
-                : null;
+        String email = user != null ? user.getEmail() : null;
         MeResponse data = userService.getCurrentUser(email);
         String message = data.authenticated() ? "Current user" : "Anonymous";
         ApiResponse<MeResponse> body = ApiResponse.ok(data, message, HttpStatus.OK.value(), httpRequest.getRequestURI());
