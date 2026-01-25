@@ -554,7 +554,17 @@
           "request": {
             "method": "GET",
             "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
-            "url": { "raw": "{{baseUrl}}/api/sailing-classes", "host": ["{{baseUrl}}"], "path": ["api","sailing-classes"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/sailing-classes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","sailing-classes"],
+              "query": [
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "classCode", "value": "", "disabled": true },
+                { "key": "hullType", "value": "", "disabled": true },
+                { "key": "worldSailingStatus", "value": "", "disabled": true }
+              ]
+            }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('List sailing classes returns 200', function () { pm.response.to.have.status(200); });"

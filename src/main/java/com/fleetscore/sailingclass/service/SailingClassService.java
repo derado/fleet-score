@@ -15,8 +15,8 @@ public class SailingClassService {
     private final SailingClassRepository sailingClassRepository;
 
     @Transactional(readOnly = true)
-    public List<SailingClassResponse> findAllSailingClasses() {
-        return sailingClassRepository.findAll().stream()
+    public List<SailingClassResponse> findAllSailingClasses(String name, String classCode, String hullType, String worldSailingStatus) {
+        return sailingClassRepository.findAllWithFilters(name, classCode, hullType, worldSailingStatus).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -31,9 +31,22 @@ public class SailingClassService {
     private SailingClassResponse toResponse(SailingClass sailingClass) {
         return new SailingClassResponse(
                 sailingClass.getId(),
+                sailingClass.getWorldSailingId(),
                 sailingClass.getName(),
+                sailingClass.getClassCode(),
                 sailingClass.getHullType(),
-                sailingClass.getWorldSailingStatus()
+                sailingClass.getWorldSailingStatus(),
+                sailingClass.getNumberOfCrew(),
+                sailingClass.getNumberOfTrapeze(),
+                sailingClass.getOptimalCrewWeight(),
+                sailingClass.getHullLength(),
+                sailingClass.getBeamLength(),
+                sailingClass.getBoatWeight(),
+                sailingClass.getHeadsailArea(),
+                sailingClass.getMainsailArea(),
+                sailingClass.getSpinnakerArea(),
+                sailingClass.getClassDesigner(),
+                sailingClass.getYearDesigned()
         );
     }
 }
