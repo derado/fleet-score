@@ -1,7 +1,11 @@
 package com.fleetscore.regatta.domain;
 
+import java.time.LocalDate;
+
 import com.fleetscore.club.domain.SailingClub;
+import com.fleetscore.common.domain.Gender;
 import com.fleetscore.common.persistence.AuditableEntity;
+import com.fleetscore.sailor.domain.Sailor;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingnation.domain.SailingNation;
 import com.fleetscore.user.domain.UserAccount;
@@ -42,8 +46,15 @@ public class Registration extends AuditableEntity {
     @Column(nullable = false, length = 100)
     private String sailorName;
 
+    @Column(nullable = false, length = 255)
+    private String email;
+
     @Column(nullable = false)
-    private Integer yearOfBirth;
+    private LocalDate dateOfBirth;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sailor_id")
+    private Sailor sailor;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 1)

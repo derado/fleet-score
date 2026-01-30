@@ -35,6 +35,7 @@
     { "key": "regattaAdminUserId", "value": "" },
     { "key": "sailingClassId", "value": "" },
     { "key": "sailingNationId", "value": "" },
+    { "key": "sailorId", "value": "" },
     { "key": "apiVersion", "value": "" },
     { "key": "verificationToken", "value": "" },
     { "key": "invitationToken", "value": "" },
@@ -697,7 +698,7 @@
             "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/registrations", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","registrations"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"sailorName\": \"John Doe\",\n  \"yearOfBirth\": 1990,\n  \"gender\": \"M\",\n  \"sailingClubName\": \"Local Sailing Club\",\n  \"sailingClubId\": null,\n  \"sailingClassId\": 1,\n  \"sailingNationId\": 1,\n  \"sailNumber\": 123\n}"
+              "raw": "{\n  \"sailorName\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"gender\": \"M\",\n  \"sailingClubName\": \"Local Sailing Club\",\n  \"sailingClubId\": null,\n  \"sailorId\": null,\n  \"sailingClassId\": 1,\n  \"sailingNationId\": 1,\n  \"sailNumber\": 123\n}"
             }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
@@ -725,6 +726,89 @@
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('List registrations returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        }
+      ]
+    },
+    {
+      "name": "Sailors",
+      "item": [
+        {
+          "name": "List All Sailors",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sailors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","sailors"],
+              "query": [
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "email", "value": "", "disabled": true },
+                { "key": "gender", "value": "", "disabled": true }
+              ]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List sailors returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Sailor by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/sailors/{{sailorId}}", "host": ["{{baseUrl}}"], "path": ["api","sailors","{{sailorId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get sailor returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Create Sailor",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/sailors", "host": ["{{baseUrl}}"], "path": ["api","sailors"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"dateOfBirth\": \"1995-03-20\",\n  \"gender\": \"F\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create sailor returns 201', function () { pm.response.to.have.status(201); });",
+                  "var j = pm.response.json(); if (j && j.data && j.data.id) { pm.collectionVariables.set('sailorId', j.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Sailor",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/sailors/{{sailorId}}", "host": ["{{baseUrl}}"], "path": ["api","sailors","{{sailorId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith-Updated\",\n  \"email\": \"jane.updated@example.com\",\n  \"dateOfBirth\": \"1995-03-20\",\n  \"gender\": \"F\"\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Update sailor returns 200', function () { pm.response.to.have.status(200); });"
           ] } } ]
         }
       ]

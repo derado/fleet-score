@@ -9,7 +9,7 @@ import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
-import com.fleetscore.regatta.domain.Gender;
+import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.regatta.service.RegistrationService;

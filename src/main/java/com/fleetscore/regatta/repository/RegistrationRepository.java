@@ -1,6 +1,6 @@
 package com.fleetscore.regatta.repository;
 
-import com.fleetscore.regatta.domain.Gender;
+import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.domain.Registration;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

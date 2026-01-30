@@ -1,12 +1,16 @@
 package com.fleetscore.regatta.api.dto;
 
-import com.fleetscore.regatta.domain.Gender;
+import java.time.LocalDate;
+
+import com.fleetscore.common.domain.Gender;
 
 public record RegistrationResponse(
         Long id,
         String sailorName,
-        Integer yearOfBirth,
+        String email,
+        LocalDate dateOfBirth,
         Gender gender,
+        Long sailorId,
         String sailingClubName,
         Long sailingClubId,
         Long userId,
