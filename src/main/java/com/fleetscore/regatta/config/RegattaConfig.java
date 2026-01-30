@@ -3,8 +3,11 @@ package com.fleetscore.regatta.config;
 import com.fleetscore.club.internal.ClubInternalApi;
 import com.fleetscore.organisation.internal.OrganisationInternalApi;
 import com.fleetscore.regatta.internal.RegattaInternalApi;
+import com.fleetscore.regatta.repository.RaceRepository;
+import com.fleetscore.regatta.repository.RaceResultRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegistrationRepository;
+import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaAuthorizationService;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.regatta.service.RegistrationService;
@@ -45,5 +48,15 @@ public class RegattaConfig {
             SailingNationInternalApi sailingNationApi,
             ClubInternalApi clubApi) {
         return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi);
+    }
+
+    @Bean
+    RaceService raceService(
+            RaceRepository raceRepository,
+            RaceResultRepository raceResultRepository,
+            RegattaRepository regattaRepository,
+            RegistrationRepository registrationRepository,
+            SailingClassInternalApi sailingClassApi) {
+        return new RaceService(raceRepository, raceResultRepository, regattaRepository, registrationRepository, sailingClassApi);
     }
 }

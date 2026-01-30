@@ -1,13 +1,16 @@
 package com.fleetscore.regatta.api;
 
 import com.fleetscore.common.api.ApiResponse;
+import com.fleetscore.regatta.api.dto.CreateRaceRequest;
 import com.fleetscore.regatta.api.dto.CreateRegistrationRequest;
 import com.fleetscore.regatta.api.dto.PromoteRegattaAdminRequest;
+import com.fleetscore.regatta.api.dto.RaceResponse;
 import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
 import com.fleetscore.regatta.domain.Gender;
+import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.regatta.service.RegistrationService;
 import com.fleetscore.user.domain.UserAccount;
@@ -41,6 +44,7 @@ public class RegattaController {
 
     private final RegattaService regattaService;
     private final RegistrationService registrationService;
+    private final RaceService raceService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<RegattaResponse>>> findAllRegattas(
@@ -160,6 +164,73 @@ public class RegattaController {
         ApiResponse<List<RegistrationResponse>> body = ApiResponse.ok(
                 data,
                 "Registrations retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/{regattaId}/races")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<RaceResponse>> createRace(
+            @PathVariable Long regattaId,
+            @Valid @RequestBody CreateRaceRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        RaceResponse data = raceService.createRace(regattaId, request);
+        ApiResponse<RaceResponse> body = ApiResponse.ok(
+                data,
+                "Race created",
+                HttpStatus.CREATED.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+
+    @GetMapping("/{regattaId}/races")
+    public ResponseEntity<ApiResponse<List<RaceResponse>>> findRaces(
+            @PathVariable Long regattaId,
+            @RequestParam(required = false) Long sailingClassId,
+            HttpServletRequest httpRequest
+    ) {
+        List<RaceResponse> data = raceService.findRacesByRegatta(regattaId, sailingClassId);
+        ApiResponse<List<RaceResponse>> body = ApiResponse.ok(
+                data,
+                "Races retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/{regattaId}/races/{raceId}")
+    public ResponseEntity<ApiResponse<RaceResponse>> findRaceById(
+            @PathVariable Long regattaId,
+            @PathVariable Long raceId,
+            HttpServletRequest httpRequest
+    ) {
+        RaceResponse data = raceService.findRaceById(raceId);
+        ApiResponse<RaceResponse> body = ApiResponse.ok(
+                data,
+                "Race retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @PutMapping("/{regattaId}/races/{raceId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<RaceResponse>> updateRace(
+            @PathVariable Long regattaId,
+            @PathVariable Long raceId,
+            @Valid @RequestBody CreateRaceRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        RaceResponse data = raceService.updateRace(raceId, request);
+        ApiResponse<RaceResponse> body = ApiResponse.ok(
+                data,
+                "Race updated",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );
