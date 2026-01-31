@@ -2,6 +2,7 @@ package com.fleetscore.common.logging;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ public class ControllerLoggingInterceptor implements HandlerInterceptor {
     private static final Logger log = LoggerFactory.getLogger(ControllerLoggingInterceptor.class);
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
         request.setAttribute(START_TIME_ATTRIBUTE, System.currentTimeMillis());
         String target = handler instanceof HandlerMethod handlerMethod
                 ? handlerMethod.getBeanType().getSimpleName() + "#" + handlerMethod.getMethod().getName()
@@ -27,7 +28,7 @@ public class ControllerLoggingInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response,
-                                Object handler,
+                                @NonNull Object handler,
                                 Exception ex) {
         Object startTime = request.getAttribute(START_TIME_ATTRIBUTE);
         long durationMs = startTime instanceof Long start ? System.currentTimeMillis() - start : -1;
