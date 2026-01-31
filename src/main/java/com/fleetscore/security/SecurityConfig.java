@@ -45,6 +45,7 @@ public class SecurityConfig {
                         "/api/auth/logout",
                         "/api/sailing-nations/**",
                         "/api/sailing-classes/**",
+                        "/api/organisations/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/v3/api-docs/**",
