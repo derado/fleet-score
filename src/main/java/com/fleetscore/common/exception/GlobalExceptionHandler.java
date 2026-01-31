@@ -1,8 +1,10 @@
 package com.fleetscore.common.exception;
 
-import jakarta.validation.ConstraintViolationException;
-import jakarta.servlet.http.HttpServletRequest;
 import com.fleetscore.common.api.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,9 +21,12 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex,
                                                                     HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
@@ -29,6 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({EmailAlreadyInUseException.class, DuplicateResourceException.class})
     public ResponseEntity<ApiResponse<Void>> handleDuplicate(RuntimeException ex,
                                                              HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
@@ -36,6 +42,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({TokenExpiredException.class, TokenAlreadyUsedException.class, InvalidTokenException.class})
     public ResponseEntity<ApiResponse<Void>> handleTokenErrors(RuntimeException ex,
                                                                HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
@@ -47,6 +54,7 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<ApiResponse<Void>> handleApiVersioning(RuntimeException ex,
                                                                  HttpServletRequest request) {
+        logException(request, ex);
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
                 ? "Invalid API version"
                 : ex.getMessage();
@@ -57,6 +65,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex,
                                                                              HttpServletRequest request) {
+        logException(request, ex);
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
         ApiResponse<Map<String, String>> body = ApiResponse.error(
@@ -71,6 +80,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleConstraint(ConstraintViolationException ex,
                                                                              HttpServletRequest request) {
+        logException(request, ex);
         Map<String, Object> data = new HashMap<>();
         data.put("errors", ex.getConstraintViolations().stream().map(v -> v.getPropertyPath() + ": " + v.getMessage()).toList());
         ApiResponse<Map<String, Object>> body = ApiResponse.error(
@@ -85,6 +95,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex,
                                                                 HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.FORBIDDEN.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
@@ -92,6 +103,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex,
                                                                 HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
@@ -99,6 +111,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex,
                                                                    HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
@@ -106,7 +119,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex,
                                                           HttpServletRequest request) {
+        logException(request, ex);
         ApiResponse<Void> body = ApiResponse.error("Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
+    private void logException(HttpServletRequest request, Exception ex) {
+        log.warn("Controller exception: {} {} -> {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
     }
 }
