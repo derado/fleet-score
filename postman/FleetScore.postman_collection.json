@@ -352,6 +352,33 @@
           ]
         },
         {
+          "name": "Update Organisation",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/organisations/{{organisationId}}", "host": ["{{baseUrl}}"], "path": ["api","organisations","{{organisationId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{organisationName}} - Updated\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Update organisation returns 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Promote Organisation Admin",
           "request": {
             "method": "PUT",

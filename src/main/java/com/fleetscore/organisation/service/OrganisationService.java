@@ -49,6 +49,20 @@ public class OrganisationService {
 
     @Transactional
     @PreAuthorize("isAuthenticated() and @orgAuthz.isAdmin(principal?.id, #organisationId)")
+    public OrganisationResponse updateOrganisation(Long organisationId, String name) {
+        Organisation organisation = organisationRepository.findById(organisationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
+
+        if (!organisation.getName().equalsIgnoreCase(name) && organisationRepository.existsByName(name)) {
+            throw new DuplicateResourceException("Organisation", "name", name);
+        }
+
+        organisation.setName(name);
+        return toResponse(organisation);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @orgAuthz.isAdmin(principal?.id, #organisationId)")
     public OrganisationResponse promoteAdmin(Long organisationId, Long newAdminUserId) {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));

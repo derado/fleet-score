@@ -76,6 +76,23 @@ public class OrganisationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
+    @PutMapping("/{organisationId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrganisationResponse>> updateOrganisation(
+            @PathVariable Long organisationId,
+            @Valid @RequestBody CreateOrganisationRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        OrganisationResponse data = organisationService.updateOrganisation(organisationId, request.name());
+        ApiResponse<OrganisationResponse> body = ApiResponse.ok(
+                data,
+                "Organisation updated",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
     @PutMapping("/{organisationId}/admins")
     public ResponseEntity<ApiResponse<OrganisationResponse>> promoteAdmin(
             @PathVariable Long organisationId,
