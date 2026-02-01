@@ -42,6 +42,10 @@ public class SailingClub extends AuditableEntity {
     @JoinColumn(name = "organisation_id")
     private Organisation organisation;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private UserAccount owner;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "sailing_club_admins",

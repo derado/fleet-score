@@ -3,6 +3,7 @@ package com.fleetscore.club.api;
 import com.fleetscore.club.api.dto.CreateSailingClubRequest;
 import com.fleetscore.club.api.dto.PromoteClubAdminRequest;
 import com.fleetscore.club.api.dto.SailingClubResponse;
+import com.fleetscore.club.api.dto.TransferClubOwnerRequest;
 import com.fleetscore.club.service.SailingClubService;
 import com.fleetscore.common.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +46,40 @@ public class SailingClubController {
         return ResponseEntity.ok(body);
     }
 
+    @DeleteMapping("/{clubId}/admins/{adminUserId}")
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isOwner(principal?.id, #clubId)")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> removeAdmin(
+            @PathVariable Long clubId,
+            @PathVariable Long adminUserId,
+            HttpServletRequest httpRequest
+    ) {
+        SailingClubResponse data = sailingClubService.removeAdmin(clubId, adminUserId);
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Club admin removed",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @PutMapping("/{clubId}/owner")
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isOwner(principal?.id, #clubId)")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> transferOwnership(
+            @PathVariable Long clubId,
+            @Valid @RequestBody TransferClubOwnerRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        SailingClubResponse data = sailingClubService.transferOwnership(clubId, request.userId());
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Club ownership transferred",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
     @GetMapping("/{clubId}")
     public ResponseEntity<ApiResponse<SailingClubResponse>> findClubById(
             @PathVariable Long clubId,
@@ -78,6 +113,7 @@ public class SailingClubController {
     }
 
     @PutMapping("/{clubId}/admins")
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isAdmin(principal?.id, #clubId)")
     public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
             @PathVariable Long clubId,
             @Valid @RequestBody PromoteClubAdminRequest request,

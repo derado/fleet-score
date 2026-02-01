@@ -57,6 +57,7 @@ public class SailingClubService {
         club.setName(name);
         club.setPlace(place);
         club.setOrganisation(organisation);
+        club.setOwner(creator);
         club.getAdmins().add(creator);
 
         SailingClub saved = sailingClubRepository.save(club);
@@ -72,6 +73,36 @@ public class SailingClubService {
         UserAccount newAdmin = userApi.findById(newAdminUserId);
 
         club.getAdmins().add(newAdmin);
+        return toResponse(club);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isOwner(principal?.id, #clubId)")
+    public SailingClubResponse removeAdmin(Long clubId, Long adminUserId) {
+        SailingClub club = sailingClubRepository.findById(clubId)
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
+
+        if (club.getOwner().getId().equals(adminUserId)) {
+            throw new AccessDeniedException("Club owner cannot be removed as admin");
+        }
+
+        UserAccount admin = userApi.findById(adminUserId);
+        club.getAdmins().remove(admin);
+        return toResponse(club);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isOwner(principal?.id, #clubId)")
+    public SailingClubResponse transferOwnership(Long clubId, Long newOwnerUserId) {
+        SailingClub club = sailingClubRepository.findById(clubId)
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
+
+        UserAccount newOwner = userApi.findById(newOwnerUserId);
+        if (!club.getAdmins().contains(newOwner)) {
+            throw new AccessDeniedException("New owner must already be a club admin");
+        }
+
+        club.setOwner(newOwner);
         return toResponse(club);
     }
 
@@ -98,6 +129,6 @@ public class SailingClubService {
     private SailingClubResponse toResponse(SailingClub club) {
         Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
         String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
-        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName);
+        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName, club.getOwner().getId());
     }
 }

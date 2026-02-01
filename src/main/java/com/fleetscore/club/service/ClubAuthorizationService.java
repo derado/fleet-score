@@ -14,4 +14,11 @@ public class ClubAuthorizationService {
         }
         return sailingClubRepository.existsByIdAndAdmins_Id(clubId, userId);
     }
+
+    public boolean isOwner(Long userId, Long clubId) {
+        if (userId == null || clubId == null) {
+            return false;
+        }
+        return sailingClubRepository.existsByIdAndOwner_Id(clubId, userId);
+    }
 }

@@ -5,5 +5,6 @@ public record SailingClubResponse(
         String name,
         String place,
         Long organisationId,
-        String organisationName
+        String organisationName,
+        Long ownerId
 ) {}
