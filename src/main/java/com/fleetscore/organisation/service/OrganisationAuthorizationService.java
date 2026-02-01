@@ -14,4 +14,11 @@ public class OrganisationAuthorizationService {
         }
         return organisationRepository.existsByIdAndAdmins_Id(organisationId, userId);
     }
+
+    public boolean isOwner(Long userId, Long organisationId) {
+        if (userId == null || organisationId == null) {
+            return false;
+        }
+        return organisationRepository.existsByIdAndOwner_Id(organisationId, userId);
+    }
 }

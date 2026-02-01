@@ -4,6 +4,7 @@ import com.fleetscore.common.api.ApiResponse;
 import com.fleetscore.organisation.api.dto.CreateOrganisationRequest;
 import com.fleetscore.organisation.api.dto.OrganisationResponse;
 import com.fleetscore.organisation.api.dto.PromoteOrganisationAdminRequest;
+import com.fleetscore.organisation.api.dto.TransferOrganisationOwnerRequest;
 import com.fleetscore.organisation.service.OrganisationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -38,6 +40,40 @@ public class OrganisationController {
         ApiResponse<List<OrganisationResponse>> body = ApiResponse.ok(
                 data,
                 "Organisations retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @DeleteMapping("/{organisationId}/admins/{adminUserId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrganisationResponse>> removeAdmin(
+            @PathVariable Long organisationId,
+            @PathVariable Long adminUserId,
+            HttpServletRequest httpRequest
+    ) {
+        OrganisationResponse data = organisationService.removeAdmin(organisationId, adminUserId);
+        ApiResponse<OrganisationResponse> body = ApiResponse.ok(
+                data,
+                "Organisation admin removed",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @PutMapping("/{organisationId}/owner")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrganisationResponse>> transferOwnership(
+            @PathVariable Long organisationId,
+            @Valid @RequestBody TransferOrganisationOwnerRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        OrganisationResponse data = organisationService.transferOwnership(organisationId, request.userId());
+        ApiResponse<OrganisationResponse> body = ApiResponse.ok(
+                data,
+                "Organisation owner transferred",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );

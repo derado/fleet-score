@@ -41,6 +41,7 @@ public class OrganisationService {
 
         Organisation organisation = new Organisation();
         organisation.setName(name);
+        organisation.setOwner(creator);
         organisation.getAdmins().add(creator);
 
         Organisation saved = organisationRepository.save(organisation);
@@ -73,7 +74,44 @@ public class OrganisationService {
         return toResponse(organisation);
     }
 
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @orgAuthz.isOwner(principal?.id, #organisationId)")
+    public OrganisationResponse removeAdmin(Long organisationId, Long adminUserId) {
+        Organisation organisation = organisationRepository.findById(organisationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
+
+        UserAccount admin = userApi.findById(adminUserId);
+
+        if (organisation.getOwner().getId().equals(adminUserId)) {
+            throw new IllegalArgumentException("Owner cannot be removed from admins");
+        }
+
+        if (!organisation.getAdmins().remove(admin)) {
+            throw new ResourceNotFoundException("Organisation admin not found");
+        }
+
+        return toResponse(organisation);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @orgAuthz.isOwner(principal?.id, #organisationId)")
+    public OrganisationResponse transferOwnership(Long organisationId, Long newOwnerUserId) {
+        Organisation organisation = organisationRepository.findById(organisationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
+
+        if (!organisationRepository.existsByIdAndAdmins_Id(organisationId, newOwnerUserId)) {
+            throw new IllegalArgumentException("New owner must be an organisation admin");
+        }
+
+        UserAccount newOwner = userApi.findById(newOwnerUserId);
+
+        organisation.setOwner(newOwner);
+        organisation.getAdmins().add(newOwner);
+        return toResponse(organisation);
+    }
+
     private OrganisationResponse toResponse(Organisation organisation) {
-        return new OrganisationResponse(organisation.getId(), organisation.getName());
+        Long ownerId = organisation.getOwner() != null ? organisation.getOwner().getId() : null;
+        return new OrganisationResponse(organisation.getId(), organisation.getName(), ownerId);
     }
 }
