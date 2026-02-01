@@ -1,5 +1,6 @@
 package com.fleetscore.organisation.service;
 
+import com.fleetscore.organisation.api.dto.CreateOrganisationRequest;
 import com.fleetscore.organisation.api.dto.OrganisationResponse;
 import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.repository.OrganisationRepository;
@@ -34,13 +35,13 @@ public class OrganisationService {
     }
 
     @Transactional
-    public OrganisationResponse createOrganisation(UserAccount creator, String name) {
-        if (organisationRepository.existsByName(name)) {
-            throw new DuplicateResourceException("Organisation", "name", name);
+    public OrganisationResponse createOrganisation(UserAccount creator, CreateOrganisationRequest request) {
+        if (organisationRepository.existsByName(request.name())) {
+            throw new DuplicateResourceException("Organisation", "name", request.name());
         }
 
         Organisation organisation = new Organisation();
-        organisation.setName(name);
+        applyRequest(organisation, request);
         organisation.setOwner(creator);
         organisation.getAdmins().add(creator);
 
@@ -50,16 +51,26 @@ public class OrganisationService {
 
     @Transactional
     @PreAuthorize("isAuthenticated() and @orgAuthz.isAdmin(principal?.id, #organisationId)")
-    public OrganisationResponse updateOrganisation(Long organisationId, String name) {
+    public OrganisationResponse updateOrganisation(Long organisationId, CreateOrganisationRequest request) {
         Organisation organisation = organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
 
-        if (!organisation.getName().equalsIgnoreCase(name) && organisationRepository.existsByName(name)) {
-            throw new DuplicateResourceException("Organisation", "name", name);
+        if (!organisation.getName().equalsIgnoreCase(request.name()) && organisationRepository.existsByName(request.name())) {
+            throw new DuplicateResourceException("Organisation", "name", request.name());
         }
 
-        organisation.setName(name);
+        applyRequest(organisation, request);
         return toResponse(organisation);
+    }
+
+    private void applyRequest(Organisation organisation, CreateOrganisationRequest request) {
+        organisation.setName(request.name());
+        organisation.setCountry(request.country());
+        organisation.setPlace(request.place());
+        organisation.setPostCode(request.postCode());
+        organisation.setAddress(request.address());
+        organisation.setEmail(request.email());
+        organisation.setPhone(request.phone());
     }
 
     @Transactional
@@ -112,6 +123,16 @@ public class OrganisationService {
 
     private OrganisationResponse toResponse(Organisation organisation) {
         Long ownerId = organisation.getOwner() != null ? organisation.getOwner().getId() : null;
-        return new OrganisationResponse(organisation.getId(), organisation.getName(), ownerId);
+        return new OrganisationResponse(
+                organisation.getId(),
+                organisation.getName(),
+                organisation.getCountry(),
+                organisation.getPlace(),
+                organisation.getPostCode(),
+                organisation.getAddress(),
+                organisation.getEmail(),
+                organisation.getPhone(),
+                ownerId
+        );
     }
 }

@@ -102,7 +102,7 @@ public class OrganisationController {
             @Valid @RequestBody CreateOrganisationRequest request,
             HttpServletRequest httpRequest
     ) {
-        OrganisationResponse data = organisationService.createOrganisation(currentUser, request.name());
+        OrganisationResponse data = organisationService.createOrganisation(currentUser, request);
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
                 "Organisation created",
@@ -119,7 +119,7 @@ public class OrganisationController {
             @Valid @RequestBody CreateOrganisationRequest request,
             HttpServletRequest httpRequest
     ) {
-        OrganisationResponse data = organisationService.updateOrganisation(organisationId, request.name());
+        OrganisationResponse data = organisationService.updateOrganisation(organisationId, request);
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
                 "Organisation updated",

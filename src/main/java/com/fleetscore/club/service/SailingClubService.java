@@ -1,5 +1,6 @@
 package com.fleetscore.club.service;
 
+import com.fleetscore.club.api.dto.CreateSailingClubRequest;
 import com.fleetscore.club.api.dto.SailingClubResponse;
 import com.fleetscore.club.domain.SailingClub;
 import com.fleetscore.club.repository.SailingClubRepository;
@@ -37,31 +38,56 @@ public class SailingClubService {
     }
 
     @Transactional
-    public SailingClubResponse createClub(UserAccount creator, String name, String place, Long organisationId) {
+    public SailingClubResponse createClub(UserAccount creator, CreateSailingClubRequest request) {
         Organisation organisation = null;
 
-        if (organisationId != null) {
-            if (!organisationApi.existsById(organisationId)) {
+        if (request.organisationId() != null) {
+            if (!organisationApi.existsById(request.organisationId())) {
                 throw new ResourceNotFoundException("Organisation not found");
             }
 
-            boolean isAdmin = organisationApi.isAdmin(organisationId, creator.getId());
+            boolean isAdmin = organisationApi.isAdmin(request.organisationId(), creator.getId());
             if (!isAdmin) {
                 throw new AccessDeniedException("Only organisation admins can create clubs for the organisation");
             }
 
-            organisation = organisationApi.findById(organisationId);
+            organisation = organisationApi.findById(request.organisationId());
         }
 
         SailingClub club = new SailingClub();
-        club.setName(name);
-        club.setPlace(place);
+        applyRequest(club, request);
         club.setOrganisation(organisation);
         club.setOwner(creator);
         club.getAdmins().add(creator);
 
         SailingClub saved = sailingClubRepository.save(club);
         return toResponse(saved);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @clubAuthz.isAdmin(principal?.id, #clubId)")
+    public SailingClubResponse updateClub(Long clubId, CreateSailingClubRequest request) {
+        SailingClub club = sailingClubRepository.findById(clubId)
+                .orElseThrow(() -> new ResourceNotFoundException("Club not found"));
+
+        Organisation organisation = null;
+        if (request.organisationId() != null) {
+            organisation = organisationApi.findById(request.organisationId());
+        }
+
+        applyRequest(club, request);
+        club.setOrganisation(organisation);
+        return toResponse(club);
+    }
+
+    private void applyRequest(SailingClub club, CreateSailingClubRequest request) {
+        club.setName(request.name());
+        club.setCountry(request.country());
+        club.setPlace(request.place());
+        club.setPostCode(request.postCode());
+        club.setAddress(request.address());
+        club.setEmail(request.email());
+        club.setPhone(request.phone());
     }
 
     @Transactional
@@ -129,6 +155,18 @@ public class SailingClubService {
     private SailingClubResponse toResponse(SailingClub club) {
         Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
         String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
-        return new SailingClubResponse(club.getId(), club.getName(), club.getPlace(), orgId, orgName, club.getOwner().getId());
+        return new SailingClubResponse(
+                club.getId(),
+                club.getName(),
+                club.getCountry(),
+                club.getPlace(),
+                club.getPostCode(),
+                club.getAddress(),
+                club.getEmail(),
+                club.getPhone(),
+                orgId,
+                orgName,
+                club.getOwner().getId()
+        );
     }
 }

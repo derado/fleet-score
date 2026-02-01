@@ -335,7 +335,7 @@
             "url": { "raw": "{{baseUrl}}/api/organisations", "host": ["{{baseUrl}}"], "path": ["api","organisations"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{organisationName}}\"\n}"
+              "raw": "{\n  \"name\": \"{{organisationName}}\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"Ulica 1\",\n  \"email\": \"org@example.com\",\n  \"phone\": \"+385 21 123456\"\n}"
             }
           },
           "event": [
@@ -363,7 +363,7 @@
             "url": { "raw": "{{baseUrl}}/api/organisations/{{organisationId}}", "host": ["{{baseUrl}}"], "path": ["api","organisations","{{organisationId}}"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{organisationName}} - Updated\"\n}"
+              "raw": "{\n  \"name\": \"{{organisationName}} - Updated\",\n  \"country\": \"Croatia\",\n  \"place\": \"Zagreb\",\n  \"postCode\": \"10000\",\n  \"address\": \"Ulica 2\",\n  \"email\": \"org-updated@example.com\",\n  \"phone\": \"+385 1 123456\"\n}"
             }
           },
           "event": [
@@ -444,7 +444,7 @@
             "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"place\": \"{{clubPlace}}\"\n}"
+              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"country\": \"Croatia\",\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 1\",\n  \"email\": \"club@example.com\",\n  \"phone\": \"+385 21 654321\"\n}"
             }
           },
           "event": [
@@ -471,7 +471,7 @@
             "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"place\": \"{{clubPlace}}\",\n  \"organisationId\": {{organisationId}}\n}"
+              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"country\": \"Croatia\",\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 1\",\n  \"email\": \"club@example.com\",\n  \"phone\": \"+385 21 654321\",\n  \"organisationId\": {{organisationId}}\n}"
             }
           },
           "event": [
@@ -485,6 +485,25 @@
               }
             }
           ]
+        },
+        {
+          "name": "Update Club",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/clubs/{{clubId}}", "host": ["{{baseUrl}}"], "path": ["api","clubs","{{clubId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{clubName}} - Updated\",\n  \"country\": \"Croatia\",\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 2\",\n  \"email\": \"club-updated@example.com\",\n  \"phone\": \"+385 21 654322\"\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Update club returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
         },
         {
           "name": "Promote Club Admin",
@@ -695,7 +714,7 @@
             "url": { "raw": "{{baseUrl}}/api/regattas", "host": ["{{baseUrl}}"], "path": ["api","regattas"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Summer Regatta 2026\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-05\",\n  \"venue\": \"Split Marina\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
+              "raw": "{\n  \"name\": \"Summer Regatta 2026\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-05\",\n  \"venue\": \"Split Marina\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"ACI Marina\",\n  \"email\": \"regatta@example.com\",\n  \"phone\": \"+385 21 789012\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
             }
           },
           "event": [
@@ -723,7 +742,7 @@
             "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Summer Regatta 2026 - Updated\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-06\",\n  \"venue\": \"Split Marina\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
+              "raw": "{\n  \"name\": \"Summer Regatta 2026 - Updated\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-06\",\n  \"venue\": \"Split Marina\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"ACI Marina Updated\",\n  \"email\": \"regatta-updated@example.com\",\n  \"phone\": \"+385 21 789012\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
             }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [

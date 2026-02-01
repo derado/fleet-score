@@ -116,6 +116,12 @@ public class RegattaService {
         regatta.setStartDate(request.startDate());
         regatta.setEndDate(request.endDate());
         regatta.setVenue(request.venue());
+        regatta.setCountry(request.country());
+        regatta.setPlace(request.place());
+        regatta.setPostCode(request.postCode());
+        regatta.setAddress(request.address());
+        regatta.setEmail(request.email());
+        regatta.setPhone(request.phone());
 
         Set<SailingClass> sailingClasses = request.sailingClassIds().stream()
                 .map(sailingClassApi::findById)
@@ -160,6 +166,12 @@ public class RegattaService {
                 regatta.getStartDate(),
                 regatta.getEndDate(),
                 regatta.getVenue(),
+                regatta.getCountry(),
+                regatta.getPlace(),
+                regatta.getPostCode(),
+                regatta.getAddress(),
+                regatta.getEmail(),
+                regatta.getPhone(),
                 sailingClasses,
                 organisers,
                 orgSummary,

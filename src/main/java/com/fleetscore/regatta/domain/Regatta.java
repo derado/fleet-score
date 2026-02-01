@@ -47,6 +47,24 @@ public class Regatta extends AuditableEntity {
     @Column(nullable = false, length = 200)
     private String venue;
 
+    @Column(length = 100)
+    private String country;
+
+    @Column(length = 100)
+    private String place;
+
+    @Column(length = 20)
+    private String postCode;
+
+    @Column(length = 200)
+    private String address;
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(length = 50)
+    private String phone;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "regatta_sailing_classes",

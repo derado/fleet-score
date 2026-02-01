@@ -1,6 +1,7 @@
 package com.fleetscore.organisation.service;
 
 import com.fleetscore.FleetScoreApplication;
+import com.fleetscore.organisation.api.dto.CreateOrganisationRequest;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.repository.UserAccountRepository;
@@ -33,7 +34,7 @@ class OrganisationServiceTest {
         creator.setEmailVerified(true);
         userAccountRepository.save(creator);
 
-        var organisationResponse = organisationService.createOrganisation(creator, "Sailing Association");
+        var organisationResponse = organisationService.createOrganisation(creator, new CreateOrganisationRequest("Sailing Association", null, null, null, null, null, null));
         assertThat(organisationResponse.id()).isNotNull();
 
         var org = organisationRepository.findById(organisationResponse.id()).orElseThrow();
@@ -55,7 +56,7 @@ class OrganisationServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var organisationResponse = organisationService.createOrganisation(owner, "National Sailing Org");
+        var organisationResponse = organisationService.createOrganisation(owner, new CreateOrganisationRequest("National Sailing Org", null, null, null, null, null, null));
 
         authenticateAs(owner);
         organisationService.promoteAdmin(organisationResponse.id(), other.getId());
@@ -86,7 +87,7 @@ class OrganisationServiceTest {
         target.setEmailVerified(true);
         userAccountRepository.save(target);
 
-        var organisationResponse = organisationService.createOrganisation(creator, "Org X");
+        var organisationResponse = organisationService.createOrganisation(creator, new CreateOrganisationRequest("Org X", null, null, null, null, null, null));
 
         authenticateAs(creator);
         organisationService.promoteAdmin(organisationResponse.id(), firstAdmin.getId());
@@ -109,7 +110,7 @@ class OrganisationServiceTest {
         admin.setEmailVerified(true);
         userAccountRepository.save(admin);
 
-        var organisationResponse = organisationService.createOrganisation(admin, "Test Org");
+        var organisationResponse = organisationService.createOrganisation(admin, new CreateOrganisationRequest("Test Org", null, null, null, null, null, null));
 
         var orgBefore = organisationRepository.findById(organisationResponse.id()).orElseThrow();
         int adminCountBefore = orgBefore.getAdmins().size();

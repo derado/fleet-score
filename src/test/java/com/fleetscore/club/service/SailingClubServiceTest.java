@@ -1,7 +1,9 @@
 package com.fleetscore.club.service;
 
 import com.fleetscore.FleetScoreApplication;
+import com.fleetscore.club.api.dto.CreateSailingClubRequest;
 import com.fleetscore.club.repository.SailingClubRepository;
+import com.fleetscore.organisation.api.dto.CreateOrganisationRequest;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.organisation.service.OrganisationService;
 import com.fleetscore.user.domain.UserAccount;
@@ -43,7 +45,7 @@ class SailingClubServiceTest {
         userAccountRepository.save(user);
 
         // when
-        var resp = sailingClubService.createClub(user, "Local Club", "Split", null);
+        var resp = sailingClubService.createClub(user, new CreateSailingClubRequest("Local Club", null, "Split", null, null, null, null, null));
 
         // then
         assertThat(resp.id()).isNotNull();
@@ -60,10 +62,10 @@ class SailingClubServiceTest {
         owner.setEmailVerified(true);
         userAccountRepository.save(owner);
 
-        var org = organisationService.createOrganisation(owner, "Org For Club");
+        var org = organisationService.createOrganisation(owner, new CreateOrganisationRequest("Org For Club", null, null, null, null, null, null));
 
         // when
-        var resp = sailingClubService.createClub(owner, "Org Club", "Zadar", org.id());
+        var resp = sailingClubService.createClub(owner, new CreateSailingClubRequest("Org Club", null, "Zadar", null, null, null, null, org.id()));
 
         // then
         assertThat(resp.organisationId()).isEqualTo(org.id());
@@ -87,11 +89,11 @@ class SailingClubServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var org = organisationService.createOrganisation(owner, "Org For Club 2");
+        var org = organisationService.createOrganisation(owner, new CreateOrganisationRequest("Org For Club 2", null, null, null, null, null, null));
 
         // when / then
         assertThrows(AccessDeniedException.class,
-                () -> sailingClubService.createClub(other, "Forbidden Club", "Rijeka", org.id()));
+                () -> sailingClubService.createClub(other, new CreateSailingClubRequest("Forbidden Club", null, "Rijeka", null, null, null, null, org.id())));
 
         assertThat(organisationRepository.findById(org.id())).isPresent();
     }
@@ -104,7 +106,7 @@ class SailingClubServiceTest {
         user.setEmailVerified(true);
         userAccountRepository.save(user);
 
-        var clubResponse = sailingClubService.createClub(user, "Admin Club", "Dubrovnik", null);
+        var clubResponse = sailingClubService.createClub(user, new CreateSailingClubRequest("Admin Club", null, "Dubrovnik", null, null, null, null, null));
 
         var club = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         assertThat(club.getAdmins()).extracting(UserAccount::getEmail).contains("clubcreator@example.com");
@@ -124,7 +126,7 @@ class SailingClubServiceTest {
         other.setEmailVerified(true);
         userAccountRepository.save(other);
 
-        var clubResponse = sailingClubService.createClub(creator, "Promo Club", "Pula", null);
+        var clubResponse = sailingClubService.createClub(creator, new CreateSailingClubRequest("Promo Club", null, "Pula", null, null, null, null, null));
 
         authenticateAs(creator);
         sailingClubService.promoteAdmin(clubResponse.id(), other.getId());
@@ -143,7 +145,7 @@ class SailingClubServiceTest {
         admin.setEmailVerified(true);
         userAccountRepository.save(admin);
 
-        var clubResponse = sailingClubService.createClub(admin, "Dupe Club", "Trogir", null);
+        var clubResponse = sailingClubService.createClub(admin, new CreateSailingClubRequest("Dupe Club", null, "Trogir", null, null, null, null, null));
 
         var clubBefore = sailingClubRepository.findById(clubResponse.id()).orElseThrow();
         int adminCountBefore = clubBefore.getAdmins().size();

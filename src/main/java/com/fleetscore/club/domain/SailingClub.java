@@ -35,8 +35,23 @@ public class SailingClub extends AuditableEntity {
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 100)
+    private String country;
+
+    @Column(length = 100)
     private String place;
+
+    @Column(length = 20)
+    private String postCode;
+
+    @Column(length = 200)
+    private String address;
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(length = 50)
+    private String phone;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisation_id")

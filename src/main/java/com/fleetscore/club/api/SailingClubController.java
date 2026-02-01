@@ -102,7 +102,7 @@ public class SailingClubController {
             @Valid @RequestBody CreateSailingClubRequest request,
             HttpServletRequest httpRequest
     ) {
-        SailingClubResponse data = sailingClubService.createClub(currentUser, request.name(), request.place(), request.organisationId());
+        SailingClubResponse data = sailingClubService.createClub(currentUser, request);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
                 "Sailing club created",
@@ -112,8 +112,23 @@ public class SailingClubController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
+    @PutMapping("/{clubId}")
+    public ResponseEntity<ApiResponse<SailingClubResponse>> updateClub(
+            @PathVariable Long clubId,
+            @Valid @RequestBody CreateSailingClubRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        SailingClubResponse data = sailingClubService.updateClub(clubId, request);
+        ApiResponse<SailingClubResponse> body = ApiResponse.ok(
+                data,
+                "Sailing club updated",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
     @PutMapping("/{clubId}/admins")
-    @PreAuthorize("isAuthenticated() and @clubAuthz.isAdmin(principal?.id, #clubId)")
     public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
             @PathVariable Long clubId,
             @Valid @RequestBody PromoteClubAdminRequest request,
