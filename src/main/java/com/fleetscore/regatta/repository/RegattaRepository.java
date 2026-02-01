@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface RegattaRepository extends JpaRepository<Regatta, Long>, JpaSpecificationExecutor<Regatta> {
     boolean existsByIdAndAdmins_Id(Long regattaId, Long userId);
+
+    boolean existsByIdAndOwner_Id(Long regattaId, Long userId);
 }

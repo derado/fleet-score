@@ -22,6 +22,7 @@ import com.fleetscore.regatta.repository.RegistrationRepository;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class RaceService {
     private final SailingClassInternalApi sailingClassApi;
 
     @Transactional
+    @PreAuthorize("isAuthenticated() and @regattaAuthz.isAdmin(principal?.id, #regattaId)")
     public RaceResponse createRace(Long regattaId, CreateRaceRequest request) {
         Regatta regatta = regattaRepository.findById(regattaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Regatta not found"));
@@ -140,6 +142,7 @@ public class RaceService {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated() and @regattaAuthz.isAdmin(principal?.id, @raceService.findRegattaIdByRaceId(#raceId))")
     public RaceResponse updateRace(Long raceId, CreateRaceRequest request) {
         Race race = raceRepository.findByIdWithSailingClass(raceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Race not found"));
@@ -248,5 +251,12 @@ public class RaceService {
                 result.getCircumstance(),
                 result.getPoints()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Long findRegattaIdByRaceId(Long raceId) {
+        Race race = raceRepository.findById(raceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Race not found"));
+        return race.getRegatta().getId();
     }
 }

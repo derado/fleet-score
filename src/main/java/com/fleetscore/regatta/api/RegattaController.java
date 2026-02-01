@@ -9,6 +9,7 @@ import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
+import com.fleetscore.regatta.api.dto.TransferRegattaOwnerRequest;
 import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaService;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,6 +63,38 @@ public class RegattaController {
         ApiResponse<List<RegattaResponse>> body = ApiResponse.ok(
                 data,
                 "Regattas retrieved",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @DeleteMapping("/{regattaId}/admins/{adminUserId}")
+    public ResponseEntity<ApiResponse<RegattaResponse>> removeAdmin(
+            @PathVariable Long regattaId,
+            @PathVariable Long adminUserId,
+            HttpServletRequest httpRequest
+    ) {
+        RegattaResponse data = regattaService.removeAdmin(regattaId, adminUserId);
+        ApiResponse<RegattaResponse> body = ApiResponse.ok(
+                data,
+                "Regatta admin removed",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @PutMapping("/{regattaId}/owner")
+    public ResponseEntity<ApiResponse<RegattaResponse>> transferOwnership(
+            @PathVariable Long regattaId,
+            @Valid @RequestBody TransferRegattaOwnerRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        RegattaResponse data = regattaService.transferOwnership(regattaId, request.userId());
+        ApiResponse<RegattaResponse> body = ApiResponse.ok(
+                data,
+                "Regatta ownership transferred",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );
@@ -171,7 +205,6 @@ public class RegattaController {
     }
 
     @PostMapping("/{regattaId}/races")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RaceResponse>> createRace(
             @PathVariable Long regattaId,
             @Valid @RequestBody CreateRaceRequest request,
@@ -220,7 +253,6 @@ public class RegattaController {
     }
 
     @PutMapping("/{regattaId}/races/{raceId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RaceResponse>> updateRace(
             @PathVariable Long regattaId,
             @PathVariable Long raceId,

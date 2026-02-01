@@ -72,6 +72,10 @@ public class Regatta extends AuditableEntity {
     private Set<UserAccount> admins = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private UserAccount owner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisation_id")
     private Organisation organisation;
 }

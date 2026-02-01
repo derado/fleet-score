@@ -750,6 +750,41 @@
           ] } } ]
         },
         {
+          "name": "Remove Regatta Admin",
+          "request": {
+            "method": "DELETE",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/admins/{{regattaAdminUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","regattas","{{regattaId}}","admins","{{regattaAdminUserId}}"]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Remove regatta admin returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Transfer Regatta Ownership",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/owner", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","owner"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{regattaAdminUserId}}\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Transfer regatta ownership returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
           "name": "Create Registration",
           "request": {
             "method": "POST",

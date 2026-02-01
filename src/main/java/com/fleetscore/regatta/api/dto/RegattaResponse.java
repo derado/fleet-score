@@ -11,7 +11,8 @@ public record RegattaResponse(
         String venue,
         Set<SailingClassSummary> sailingClasses,
         Set<OrganiserSummary> organisers,
-        OrganisationSummary organisation
+        OrganisationSummary organisation,
+        Long ownerId
 ) {
     public record SailingClassSummary(Long id, String name) {}
     public record OrganiserSummary(Long id, String name) {}

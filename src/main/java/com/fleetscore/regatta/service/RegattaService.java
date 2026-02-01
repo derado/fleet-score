@@ -16,6 +16,7 @@ import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.internal.UserInternalApi;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,7 @@ public class RegattaService {
     public RegattaResponse createRegatta(UserAccount creator, RegattaRequest request) {
         Regatta regatta = new Regatta();
         applyRequest(regatta, request);
+        regatta.setOwner(creator);
         regatta.getAdmins().add(creator);
 
         Regatta saved = regattaRepository.save(regatta);
@@ -75,6 +77,37 @@ public class RegattaService {
         UserAccount newAdmin = userApi.findById(newAdminUserId);
 
         regatta.getAdmins().add(newAdmin);
+        return toResponse(regatta);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @regattaAuthz.isOwner(principal?.id, #regattaId)")
+    public RegattaResponse removeAdmin(Long regattaId, Long adminUserId) {
+        Regatta regatta = regattaRepository.findById(regattaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Regatta not found"));
+
+        if (regatta.getOwner() != null && regatta.getOwner().getId().equals(adminUserId)) {
+            throw new AccessDeniedException("Cannot remove the owner as admin");
+        }
+
+        regatta.getAdmins().removeIf(admin -> admin.getId().equals(adminUserId));
+        return toResponse(regatta);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @regattaAuthz.isOwner(principal?.id, #regattaId)")
+    public RegattaResponse transferOwnership(Long regattaId, Long newOwnerUserId) {
+        Regatta regatta = regattaRepository.findById(regattaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Regatta not found"));
+
+        boolean isAdmin = regatta.getAdmins().stream()
+                .anyMatch(admin -> admin.getId().equals(newOwnerUserId));
+        if (!isAdmin) {
+            throw new AccessDeniedException("New owner must be an existing admin");
+        }
+
+        UserAccount newOwner = userApi.findById(newOwnerUserId);
+        regatta.setOwner(newOwner);
         return toResponse(regatta);
     }
 
@@ -129,7 +162,8 @@ public class RegattaService {
                 regatta.getVenue(),
                 sailingClasses,
                 organisers,
-                orgSummary
+                orgSummary,
+                regatta.getOwner() != null ? regatta.getOwner().getId() : null
         );
     }
 }

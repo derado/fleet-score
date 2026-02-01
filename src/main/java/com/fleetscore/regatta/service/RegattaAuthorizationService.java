@@ -14,4 +14,11 @@ public class RegattaAuthorizationService {
         }
         return regattaRepository.existsByIdAndAdmins_Id(regattaId, userId);
     }
+
+    public boolean isOwner(Long userId, Long regattaId) {
+        if (userId == null || regattaId == null) {
+            return false;
+        }
+        return regattaRepository.existsByIdAndOwner_Id(regattaId, userId);
+    }
 }
