@@ -39,6 +39,7 @@ public class SailingClubController {
         List<SailingClubResponse> data = sailingClubService.findAllClubs();
         ApiResponse<List<SailingClubResponse>> body = ApiResponse.ok(
                 data,
+                "CLUBS_RETRIEVED",
                 "Clubs retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -56,6 +57,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.removeAdmin(clubId, adminUserId);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_ADMIN_REMOVED",
                 "Club admin removed",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -73,6 +75,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.transferOwnership(clubId, request.userId());
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_OWNERSHIP_TRANSFERRED",
                 "Club ownership transferred",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -88,6 +91,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.findClubById(clubId);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_RETRIEVED",
                 "Club retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -105,6 +109,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.createClub(currentUser, request);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_CREATED",
                 "Sailing club created",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -121,6 +126,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.updateClub(clubId, request);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_UPDATED",
                 "Sailing club updated",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -137,6 +143,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.promoteAdmin(clubId, request.userId());
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_ADMIN_PROMOTED",
                 "Club admin promoted",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -154,6 +161,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.joinClub(currentUser, clubId);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_JOINED",
                 "Joined club",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -171,6 +179,7 @@ public class SailingClubController {
         SailingClubResponse data = sailingClubService.leaveClub(currentUser, clubId);
         ApiResponse<SailingClubResponse> body = ApiResponse.ok(
                 data,
+                "CLUB_LEFT",
                 "Left club",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()

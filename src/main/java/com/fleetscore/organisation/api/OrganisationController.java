@@ -39,6 +39,7 @@ public class OrganisationController {
         List<OrganisationResponse> data = organisationService.findAllOrganisations();
         ApiResponse<List<OrganisationResponse>> body = ApiResponse.ok(
                 data,
+                "ORGANISATIONS_RETRIEVED",
                 "Organisations retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -56,6 +57,7 @@ public class OrganisationController {
         OrganisationResponse data = organisationService.removeAdmin(organisationId, adminUserId);
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
+                "ORGANISATION_ADMIN_REMOVED",
                 "Organisation admin removed",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -73,6 +75,7 @@ public class OrganisationController {
         OrganisationResponse data = organisationService.transferOwnership(organisationId, request.userId());
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
+                "ORGANISATION_OWNERSHIP_TRANSFERRED",
                 "Organisation owner transferred",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -88,6 +91,7 @@ public class OrganisationController {
         OrganisationResponse data = organisationService.findOrganisationById(organisationId);
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
+                "ORGANISATION_RETRIEVED",
                 "Organisation retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -105,6 +109,7 @@ public class OrganisationController {
         OrganisationResponse data = organisationService.createOrganisation(currentUser, request);
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
+                "ORGANISATION_CREATED",
                 "Organisation created",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -122,6 +127,7 @@ public class OrganisationController {
         OrganisationResponse data = organisationService.updateOrganisation(organisationId, request);
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
+                "ORGANISATION_UPDATED",
                 "Organisation updated",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -138,6 +144,7 @@ public class OrganisationController {
         OrganisationResponse data = organisationService.promoteAdmin(organisationId, request.userId());
         ApiResponse<OrganisationResponse> body = ApiResponse.ok(
                 data,
+                "ORGANISATION_ADMIN_PROMOTED",
                 "Organisation admin promoted",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()

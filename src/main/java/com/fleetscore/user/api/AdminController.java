@@ -34,6 +34,7 @@ public class AdminController {
                                                     HttpServletRequest httpRequest) {
         userService.createInvitation(request.email(), currentUser.getId());
         ApiResponse<NoContent> body = ApiResponse.ok(
+                "INVITATION_SENT",
                 "Invitation email sent",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()

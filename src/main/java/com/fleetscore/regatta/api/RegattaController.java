@@ -62,6 +62,7 @@ public class RegattaController {
         List<RegattaResponse> data = regattaService.findAllRegattas(filter);
         ApiResponse<List<RegattaResponse>> body = ApiResponse.ok(
                 data,
+                "REGATTAS_RETRIEVED",
                 "Regattas retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -78,6 +79,7 @@ public class RegattaController {
         RegattaResponse data = regattaService.removeAdmin(regattaId, adminUserId);
         ApiResponse<RegattaResponse> body = ApiResponse.ok(
                 data,
+                "REGATTA_ADMIN_REMOVED",
                 "Regatta admin removed",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -94,6 +96,7 @@ public class RegattaController {
         RegattaResponse data = regattaService.transferOwnership(regattaId, request.userId());
         ApiResponse<RegattaResponse> body = ApiResponse.ok(
                 data,
+                "REGATTA_OWNERSHIP_TRANSFERRED",
                 "Regatta ownership transferred",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -109,6 +112,7 @@ public class RegattaController {
         RegattaResponse data = regattaService.findRegattaById(regattaId);
         ApiResponse<RegattaResponse> body = ApiResponse.ok(
                 data,
+                "REGATTA_RETRIEVED",
                 "Regatta retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -126,6 +130,7 @@ public class RegattaController {
         RegattaResponse data = regattaService.createRegatta(currentUser, request);
         ApiResponse<RegattaResponse> body = ApiResponse.ok(
                 data,
+                "REGATTA_CREATED",
                 "Regatta created",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -142,6 +147,7 @@ public class RegattaController {
         RegattaResponse data = regattaService.updateRegatta(regattaId, request);
         ApiResponse<RegattaResponse> body = ApiResponse.ok(
                 data,
+                "REGATTA_UPDATED",
                 "Regatta updated",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -158,6 +164,7 @@ public class RegattaController {
         RegattaResponse data = regattaService.promoteAdmin(regattaId, request.userId());
         ApiResponse<RegattaResponse> body = ApiResponse.ok(
                 data,
+                "REGATTA_ADMIN_PROMOTED",
                 "Regatta admin promoted",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -175,6 +182,7 @@ public class RegattaController {
         RegistrationResponse data = registrationService.createRegistration(regattaId, request, currentUser);
         ApiResponse<RegistrationResponse> body = ApiResponse.ok(
                 data,
+                "REGISTRATION_CREATED",
                 "Registration created",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -197,6 +205,7 @@ public class RegattaController {
                 regattaId, sailingClassId, sailingNationId, sailorName, sailingClubName, sailNumber, gender);
         ApiResponse<List<RegistrationResponse>> body = ApiResponse.ok(
                 data,
+                "REGISTRATIONS_RETRIEVED",
                 "Registrations retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -213,6 +222,7 @@ public class RegattaController {
         RaceResponse data = raceService.createRace(regattaId, request);
         ApiResponse<RaceResponse> body = ApiResponse.ok(
                 data,
+                "RACE_CREATED",
                 "Race created",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -229,6 +239,7 @@ public class RegattaController {
         List<RaceResponse> data = raceService.findRacesByRegatta(regattaId, sailingClassId);
         ApiResponse<List<RaceResponse>> body = ApiResponse.ok(
                 data,
+                "RACES_RETRIEVED",
                 "Races retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -245,6 +256,7 @@ public class RegattaController {
         RaceResponse data = raceService.findRaceById(raceId);
         ApiResponse<RaceResponse> body = ApiResponse.ok(
                 data,
+                "RACE_RETRIEVED",
                 "Race retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -262,6 +274,7 @@ public class RegattaController {
         RaceResponse data = raceService.updateRace(raceId, request);
         ApiResponse<RaceResponse> body = ApiResponse.ok(
                 data,
+                "RACE_UPDATED",
                 "Race updated",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()

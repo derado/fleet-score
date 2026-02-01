@@ -37,7 +37,7 @@ public class ProfileController {
         String email = currentUser.getEmail();
         Profile profile = userService.upsertProfile(email, request.firstName(), request.lastName());
         ProfileResponse data = new ProfileResponse(email, profile.getFirstName(), profile.getLastName());
-        ApiResponse<ProfileResponse> body = ApiResponse.ok(data, "Profile updated", HttpStatus.OK.value(),
+        ApiResponse<ProfileResponse> body = ApiResponse.ok(data, "PROFILE_UPDATED", "Profile updated", HttpStatus.OK.value(),
                 httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }

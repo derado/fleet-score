@@ -27,23 +27,47 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex,
                                                                     HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("RESOURCE_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
-    @ExceptionHandler({EmailAlreadyInUseException.class, DuplicateResourceException.class})
-    public ResponseEntity<ApiResponse<Void>> handleDuplicate(RuntimeException ex,
-                                                             HttpServletRequest request) {
+    @ExceptionHandler(EmailAlreadyInUseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEmailInUse(EmailAlreadyInUseException ex,
+                                                              HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("EMAIL_IN_USE", ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
-    @ExceptionHandler({TokenExpiredException.class, TokenAlreadyUsedException.class, InvalidTokenException.class})
-    public ResponseEntity<ApiResponse<Void>> handleTokenErrors(RuntimeException ex,
-                                                               HttpServletRequest request) {
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicate(DuplicateResourceException ex,
+                                                             HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("DUPLICATE_RESOURCE", ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTokenExpired(TokenExpiredException ex,
+                                                                HttpServletRequest request) {
+        logException(request, ex);
+        ApiResponse<Void> body = ApiResponse.error("TOKEN_EXPIRED", ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(TokenAlreadyUsedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTokenAlreadyUsed(TokenAlreadyUsedException ex,
+                                                                    HttpServletRequest request) {
+        logException(request, ex);
+        ApiResponse<Void> body = ApiResponse.error("TOKEN_ALREADY_USED", ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidToken(InvalidTokenException ex,
+                                                                HttpServletRequest request) {
+        logException(request, ex);
+        ApiResponse<Void> body = ApiResponse.error("INVALID_TOKEN", ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
 
@@ -58,7 +82,7 @@ public class GlobalExceptionHandler {
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
                 ? "Invalid API version"
                 : ex.getMessage();
-        ApiResponse<Void> body = ApiResponse.error(message, HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("INVALID_API_VERSION", message, HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
 
@@ -69,6 +93,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
         ApiResponse<Map<String, String>> body = ApiResponse.error(
+                "VALIDATION_FAILED",
                 "Validation failed",
                 HttpStatus.BAD_REQUEST.value(),
                 request.getRequestURI(),
@@ -84,6 +109,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> data = new HashMap<>();
         data.put("errors", ex.getConstraintViolations().stream().map(v -> v.getPropertyPath() + ": " + v.getMessage()).toList());
         ApiResponse<Map<String, Object>> body = ApiResponse.error(
+                "CONSTRAINT_VIOLATION",
                 "Constraint violation",
                 HttpStatus.BAD_REQUEST.value(),
                 request.getRequestURI(),
@@ -96,7 +122,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex,
                                                                 HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.FORBIDDEN.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("ACCESS_DENIED", ex.getMessage(), HttpStatus.FORBIDDEN.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
@@ -104,7 +130,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex,
                                                                 HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("ILLEGAL_STATE", ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
 
@@ -112,7 +138,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex,
                                                                    HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("ILLEGAL_ARGUMENT", ex.getMessage(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
 
@@ -120,7 +146,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex,
                                                           HttpServletRequest request) {
         logException(request, ex);
-        ApiResponse<Void> body = ApiResponse.error("Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR.value(), request.getRequestURI());
+        ApiResponse<Void> body = ApiResponse.error("INTERNAL_ERROR", "Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR.value(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 

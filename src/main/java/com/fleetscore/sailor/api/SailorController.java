@@ -43,6 +43,7 @@ public class SailorController {
         List<SailorResponse> data = sailorService.findAllSailors(filter);
         ApiResponse<List<SailorResponse>> body = ApiResponse.ok(
                 data,
+                "SAILORS_RETRIEVED",
                 "Sailors retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -58,6 +59,7 @@ public class SailorController {
         SailorResponse data = sailorService.findSailorById(sailorId);
         ApiResponse<SailorResponse> body = ApiResponse.ok(
                 data,
+                "SAILOR_RETRIEVED",
                 "Sailor retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -74,6 +76,7 @@ public class SailorController {
         SailorResponse data = sailorService.createSailor(request);
         ApiResponse<SailorResponse> body = ApiResponse.ok(
                 data,
+                "SAILOR_CREATED",
                 "Sailor created",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -91,6 +94,7 @@ public class SailorController {
         SailorResponse data = sailorService.updateSailor(sailorId, request);
         ApiResponse<SailorResponse> body = ApiResponse.ok(
                 data,
+                "SAILOR_UPDATED",
                 "Sailor updated",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()

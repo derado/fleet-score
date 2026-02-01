@@ -38,6 +38,7 @@ public class AuthController {
                                                    HttpServletRequest httpRequest) {
         userService.registerUser(request);
         ApiResponse<NoContent> body = ApiResponse.ok(
+                "USER_REGISTERED",
                 "Registration successful. Verification email sent.",
                 HttpStatus.CREATED.value(),
                 httpRequest.getRequestURI()
@@ -50,6 +51,7 @@ public class AuthController {
                                                  HttpServletRequest httpRequest) {
         userService.verifyEmail(token);
         ApiResponse<NoContent> resp = ApiResponse.ok(
+                "EMAIL_VERIFIED",
                 "Email verified. You can now log in.",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI());
@@ -61,6 +63,7 @@ public class AuthController {
                                                              HttpServletRequest httpRequest) {
         userService.resendVerificationEmail(req.email());
         ApiResponse<NoContent> resp = ApiResponse.ok(
+                "VERIFICATION_EMAIL_SENT",
                 "If the email is registered and not verified, a new verification email has been sent.",
                 HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
@@ -70,7 +73,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<NoContent>> acceptInvitation(@Valid @RequestBody AcceptInvitationRequest req,
                                                           HttpServletRequest httpRequest) {
         userService.acceptInvitation(req.token(), req.password());
-        ApiResponse<NoContent> resp = ApiResponse.ok("Invitation accepted", HttpStatus.OK.value(),
+        ApiResponse<NoContent> resp = ApiResponse.ok("INVITATION_ACCEPTED", "Invitation accepted", HttpStatus.OK.value(),
                 httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
@@ -80,6 +83,7 @@ public class AuthController {
                                                          HttpServletRequest httpRequest) {
         userService.requestPasswordReset(req.email());
         ApiResponse<NoContent> resp = ApiResponse.ok(
+                "PASSWORD_RESET_EMAIL_SENT",
                 "If an account exists for this email, a password reset email has been sent.",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
@@ -91,7 +95,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<NoContent>> resetPassword(@Valid @RequestBody ResetPasswordRequest req,
                                                         HttpServletRequest httpRequest) {
         userService.resetPassword(req.token(), req.password());
-        ApiResponse<NoContent> resp = ApiResponse.ok("Password reset successful", HttpStatus.OK.value(),
+        ApiResponse<NoContent> resp = ApiResponse.ok("PASSWORD_RESET", "Password reset successful", HttpStatus.OK.value(),
                 httpRequest.getRequestURI());
         return ResponseEntity.ok(resp);
     }
@@ -101,7 +105,7 @@ public class AuthController {
                                                             HttpServletRequest httpRequest,
                                                             HttpServletResponse httpResponse) {
         TokenResponse tokens = authService.login(request, httpResponse);
-        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "Login successful", HttpStatus.OK.value(),
+        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "LOGIN_SUCCESS", "Login successful", HttpStatus.OK.value(),
                 httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
@@ -110,7 +114,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(HttpServletRequest httpRequest,
                                                               HttpServletResponse httpResponse) {
         TokenResponse tokens = authService.refresh(httpRequest, httpResponse);
-        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "Token refreshed", HttpStatus.OK.value(),
+        ApiResponse<TokenResponse> body = ApiResponse.ok(tokens, "TOKEN_REFRESHED", "Token refreshed", HttpStatus.OK.value(),
                 httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
@@ -119,7 +123,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<NoContent>> logout(HttpServletRequest httpRequest,
                                                  HttpServletResponse httpResponse) {
         authService.logout(httpRequest, httpResponse);
-        ApiResponse<NoContent> body = ApiResponse.ok("Logged out", HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<NoContent> body = ApiResponse.ok("LOGGED_OUT", "Logged out", HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
 
@@ -128,8 +132,9 @@ public class AuthController {
                                                       HttpServletRequest httpRequest) {
         String email = user != null ? user.getEmail() : null;
         MeResponse data = userService.getCurrentUser(email);
+        String code = data.authenticated() ? "USER_AUTHENTICATED" : "USER_ANONYMOUS";
         String message = data.authenticated() ? "Current user" : "Anonymous";
-        ApiResponse<MeResponse> body = ApiResponse.ok(data, message, HttpStatus.OK.value(), httpRequest.getRequestURI());
+        ApiResponse<MeResponse> body = ApiResponse.ok(data, code, message, HttpStatus.OK.value(), httpRequest.getRequestURI());
         return ResponseEntity.ok(body);
     }
 }
