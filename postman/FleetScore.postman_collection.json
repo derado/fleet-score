@@ -33,6 +33,7 @@
     { "key": "clubAdminUserId", "value": "" },
     { "key": "regattaId", "value": "" },
     { "key": "registrationId", "value": "" },
+    { "key": "raceId", "value": "" },
     { "key": "regattaAdminUserId", "value": "" },
     { "key": "sailingClassId", "value": "" },
     { "key": "sailingNationId", "value": "" },
@@ -870,6 +871,82 @@
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('List registrations returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Create Race",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/races", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","races"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sailingClassId\": 1,\n  \"raceNumber\": 1,\n  \"raceDate\": \"2026-07-01\",\n  \"results\": [\n    { \"registrationId\": 1, \"position\": 1, \"circumstance\": null },\n    { \"registrationId\": 2, \"position\": 2, \"circumstance\": null },\n    { \"registrationId\": 3, \"position\": null, \"circumstance\": \"DNF\" }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create race returns 201', function () { pm.response.to.have.status(201); });",
+                  "var j = pm.response.json(); if (j && j.data && j.data.id) { pm.collectionVariables.set('raceId', j.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Races by Regatta",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/races",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","regattas","{{regattaId}}","races"],
+              "query": [
+                { "key": "sailingClassId", "value": "", "disabled": true }
+              ]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('List races returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Race by ID",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/races/{{raceId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","races","{{raceId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get race returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Update Race",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/races/{{raceId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","races","{{raceId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sailingClassId\": 1,\n  \"raceNumber\": 1,\n  \"raceDate\": \"2026-07-01\",\n  \"results\": [\n    { \"registrationId\": 1, \"position\": 2, \"circumstance\": null },\n    { \"registrationId\": 2, \"position\": 1, \"circumstance\": null },\n    { \"registrationId\": 3, \"position\": 3, \"circumstance\": null }\n  ]\n}"
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Update race returns 200', function () { pm.response.to.have.status(200); });"
           ] } } ]
         },
         {
