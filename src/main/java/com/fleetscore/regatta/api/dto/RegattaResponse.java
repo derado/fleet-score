@@ -15,6 +15,8 @@ public record RegattaResponse(
         String address,
         String email,
         String phone,
+        Integer throwoutAfter,
+        Integer throwoutLimit,
         Set<SailingClassSummary> sailingClasses,
         Set<OrganiserSummary> organisers,
         OrganisationSummary organisation,

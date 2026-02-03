@@ -714,7 +714,7 @@
             "url": { "raw": "{{baseUrl}}/api/regattas", "host": ["{{baseUrl}}"], "path": ["api","regattas"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Summer Regatta 2026\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-05\",\n  \"venue\": \"Split Marina\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"ACI Marina\",\n  \"email\": \"regatta@example.com\",\n  \"phone\": \"+385 21 789012\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
+              "raw": "{\n  \"name\": \"Summer Regatta 2026\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-05\",\n  \"venue\": \"Split Marina\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"ACI Marina\",\n  \"email\": \"regatta@example.com\",\n  \"phone\": \"+385 21 789012\",\n  \"throwoutAfter\": 4,\n  \"throwoutLimit\": 1,\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
             }
           },
           "event": [
@@ -742,7 +742,7 @@
             "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Summer Regatta 2026 - Updated\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-06\",\n  \"venue\": \"Split Marina\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"ACI Marina Updated\",\n  \"email\": \"regatta-updated@example.com\",\n  \"phone\": \"+385 21 789012\",\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
+              "raw": "{\n  \"name\": \"Summer Regatta 2026 - Updated\",\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-07-06\",\n  \"venue\": \"Split Marina\",\n  \"country\": \"Croatia\",\n  \"place\": \"Split\",\n  \"postCode\": \"21000\",\n  \"address\": \"ACI Marina Updated\",\n  \"email\": \"regatta-updated@example.com\",\n  \"phone\": \"+385 21 789012\",\n  \"throwoutAfter\": 4,\n  \"throwoutLimit\": 2,\n  \"sailingClassIds\": [1],\n  \"organiserClubIds\": [],\n  \"organisationId\": null\n}"
             }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
@@ -842,6 +842,21 @@
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('List registrations returns 200', function () { pm.response.to.have.status(200); });"
+          ] } } ]
+        },
+        {
+          "name": "Get Regatta Scores",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/scores/{{sailingClassId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","regattas","{{regattaId}}","scores","{{sailingClassId}}"]
+            }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Get regatta scores returns 200', function () { pm.response.to.have.status(200); });"
           ] } } ]
         }
       ]

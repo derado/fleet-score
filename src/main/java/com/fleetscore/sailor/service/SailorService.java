@@ -19,7 +19,7 @@ public class SailorService {
 
     @Transactional(readOnly = true)
     public List<SailorResponse> findAllSailors(SailorFilter filter) {
-        Specification<Sailor> spec = Specification.where((Specification<Sailor>) null);
+        Specification<Sailor> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (filter.name() != null && !filter.name().isBlank()) {
             spec = spec.and((root, query, cb) ->

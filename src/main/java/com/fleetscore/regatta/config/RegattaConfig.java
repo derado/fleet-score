@@ -7,10 +7,12 @@ import com.fleetscore.regatta.repository.RaceRepository;
 import com.fleetscore.regatta.repository.RaceResultRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegistrationRepository;
+import com.fleetscore.regatta.scoring.LowPointScoringCalculator;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaAuthorizationService;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.regatta.service.RegistrationService;
+import com.fleetscore.regatta.service.ScoringService;
 import com.fleetscore.sailor.internal.SailorInternalApi;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import com.fleetscore.sailingnation.internal.SailingNationInternalApi;
@@ -60,5 +62,21 @@ public class RegattaConfig {
             RegistrationRepository registrationRepository,
             SailingClassInternalApi sailingClassApi) {
         return new RaceService(raceRepository, raceResultRepository, regattaRepository, registrationRepository, sailingClassApi);
+    }
+
+    @Bean
+    LowPointScoringCalculator lowPointScoringCalculator() {
+        return new LowPointScoringCalculator();
+    }
+
+    @Bean
+    ScoringService scoringService(
+            RegattaRepository regattaRepository,
+            RaceRepository raceRepository,
+            RaceResultRepository raceResultRepository,
+            RegistrationRepository registrationRepository,
+            SailingClassInternalApi sailingClassApi,
+            LowPointScoringCalculator scoringCalculator) {
+        return new ScoringService(regattaRepository, raceRepository, raceResultRepository, registrationRepository, sailingClassApi, scoringCalculator);
     }
 }

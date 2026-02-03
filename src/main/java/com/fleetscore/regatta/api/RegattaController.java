@@ -8,12 +8,14 @@ import com.fleetscore.regatta.api.dto.RaceResponse;
 import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
+import com.fleetscore.regatta.api.dto.RegattaScoreResponse;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
 import com.fleetscore.regatta.api.dto.TransferRegattaOwnerRequest;
 import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.regatta.service.RegistrationService;
+import com.fleetscore.regatta.service.ScoringService;
 import com.fleetscore.user.domain.UserAccount;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -47,6 +49,7 @@ public class RegattaController {
     private final RegattaService regattaService;
     private final RegistrationService registrationService;
     private final RaceService raceService;
+    private final ScoringService scoringService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<RegattaResponse>>> findAllRegattas(
@@ -276,6 +279,23 @@ public class RegattaController {
                 data,
                 "RACE_UPDATED",
                 "Race updated",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/{regattaId}/scores/{sailingClassId}")
+    public ResponseEntity<ApiResponse<RegattaScoreResponse>> findScores(
+            @PathVariable Long regattaId,
+            @PathVariable Long sailingClassId,
+            HttpServletRequest httpRequest
+    ) {
+        RegattaScoreResponse data = scoringService.calculateScores(regattaId, sailingClassId);
+        ApiResponse<RegattaScoreResponse> body = ApiResponse.ok(
+                data,
+                "REGATTA_SCORES_RETRIEVED",
+                "Regatta scores retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );

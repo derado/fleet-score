@@ -33,6 +33,8 @@ public record RegattaRequest(
         String email,
         @Size(max = 50)
         String phone,
+        Integer throwoutAfter,
+        Integer throwoutLimit,
         @NotEmpty
         Set<Long> sailingClassIds,
         Set<Long> organiserClubIds,

@@ -122,6 +122,8 @@ public class RegattaService {
         regatta.setAddress(request.address());
         regatta.setEmail(request.email());
         regatta.setPhone(request.phone());
+        regatta.setThrowoutAfter(request.throwoutAfter() != null ? request.throwoutAfter() : 0);
+        regatta.setThrowoutLimit(request.throwoutLimit() != null ? request.throwoutLimit() : 0);
 
         Set<SailingClass> sailingClasses = request.sailingClassIds().stream()
                 .map(sailingClassApi::findById)
@@ -172,6 +174,8 @@ public class RegattaService {
                 regatta.getAddress(),
                 regatta.getEmail(),
                 regatta.getPhone(),
+                regatta.getThrowoutAfter(),
+                regatta.getThrowoutLimit(),
                 sailingClasses,
                 organisers,
                 orgSummary,

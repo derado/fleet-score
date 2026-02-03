@@ -65,6 +65,12 @@ public class Regatta extends AuditableEntity {
     @Column(length = 50)
     private String phone;
 
+    @Column(nullable = false)
+    private Integer throwoutAfter = 0;
+
+    @Column(nullable = false)
+    private Integer throwoutLimit = 0;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "regatta_sailing_classes",
