@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RequiredArgsConstructor
 public class ScoringService {
@@ -30,7 +29,6 @@ public class ScoringService {
     private final RegattaRepository regattaRepository;
     private final RaceRepository raceRepository;
     private final RaceResultRepository raceResultRepository;
-    private final RegistrationRepository registrationRepository;
     private final SailingClassInternalApi sailingClassApi;
     private final LowPointScoringCalculator scoringCalculator;
 
