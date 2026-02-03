@@ -109,12 +109,17 @@ public class ScoringService {
                 ));
             }
 
+            Integer yearOfBirth = registration.getDateOfBirth() != null 
+                    ? registration.getDateOfBirth().getYear() : null;
+
             standings.add(new RegattaScoreResponse.SailorStanding(
                     score.rank(),
                     registration.getId(),
                     registration.getSailorName(),
                     registration.getSailNumber(),
                     registration.getSailingNation().getCode(),
+                    registration.getSailingClubName(),
+                    yearOfBirth,
                     score.netPoints(),
                     score.totalPoints(),
                     raceResults

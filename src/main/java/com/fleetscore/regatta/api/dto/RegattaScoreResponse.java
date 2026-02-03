@@ -25,6 +25,8 @@ public record RegattaScoreResponse(
             String sailorName,
             Integer sailNumber,
             String nationCode,
+            String sailingClubName,
+            Integer yearOfBirth,
             int netPoints,
             int totalPoints,
             List<RaceResult> raceResults
