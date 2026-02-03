@@ -10,6 +10,10 @@ import java.util.List;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
+    boolean existsByRegattaIdAndSailNumberAndSailingClassId(Long regattaId, Integer sailNumber, Long sailingClassId);
+
+    boolean existsByRegattaIdAndSailNumberAndSailingClassIdAndIdNot(Long regattaId, Integer sailNumber, Long sailingClassId, Long id);
+
     @Query("SELECT r FROM Registration r " +
            "JOIN FETCH r.sailingClass " +
            "JOIN FETCH r.sailingNation " +

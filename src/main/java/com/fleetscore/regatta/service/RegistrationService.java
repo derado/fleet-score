@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fleetscore.club.domain.SailingClub;
 import com.fleetscore.club.internal.ClubInternalApi;
+import com.fleetscore.common.exception.DuplicateSailNumberException;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import com.fleetscore.regatta.api.dto.CreateRegistrationRequest;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
@@ -45,6 +46,11 @@ public class RegistrationService {
 
         SailingNation sailingNation = sailingNationApi.findById(request.sailingNationId());
 
+        if (registrationRepository.existsByRegattaIdAndSailNumberAndSailingClassId(
+                regattaId, request.sailNumber(), request.sailingClassId())) {
+            throw new DuplicateSailNumberException(request.sailNumber());
+        }
+
         SailingClub sailingClub = null;
         if (request.sailingClubId() != null) {
             sailingClub = clubApi.findById(request.sailingClubId());
@@ -83,6 +89,42 @@ public class RegistrationService {
                         request.dateOfBirth(),
                         request.gender()
                 ));
+    }
+
+    @Transactional
+    public RegistrationResponse updateRegistration(Long registrationId, CreateRegistrationRequest request) {
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Registration not found"));
+
+        SailingClass sailingClass = sailingClassApi.findById(request.sailingClassId());
+
+        if (!registration.getRegatta().getSailingClasses().contains(sailingClass)) {
+            throw new IllegalArgumentException("Sailing class is not part of this regatta");
+        }
+
+        SailingNation sailingNation = sailingNationApi.findById(request.sailingNationId());
+
+        if (registrationRepository.existsByRegattaIdAndSailNumberAndSailingClassIdAndIdNot(
+                registration.getRegatta().getId(), request.sailNumber(), request.sailingClassId(), registrationId)) {
+            throw new DuplicateSailNumberException(request.sailNumber());
+        }
+
+        SailingClub sailingClub = null;
+        if (request.sailingClubId() != null) {
+            sailingClub = clubApi.findById(request.sailingClubId());
+        }
+
+        registration.setSailorName(request.sailorName());
+        registration.setEmail(request.email());
+        registration.setDateOfBirth(request.dateOfBirth());
+        registration.setGender(request.gender());
+        registration.setSailingClubName(request.sailingClubName());
+        registration.setSailingClub(sailingClub);
+        registration.setSailingClass(sailingClass);
+        registration.setSailingNation(sailingNation);
+        registration.setSailNumber(request.sailNumber());
+
+        return toResponse(registration);
     }
 
     @Transactional(readOnly = true)

@@ -193,6 +193,24 @@ public class RegattaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
+    @PutMapping("/{regattaId}/registrations/{registrationId}")
+    public ResponseEntity<ApiResponse<RegistrationResponse>> updateRegistration(
+            @PathVariable Long regattaId,
+            @PathVariable Long registrationId,
+            @Valid @RequestBody CreateRegistrationRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        RegistrationResponse data = registrationService.updateRegistration(registrationId, request);
+        ApiResponse<RegistrationResponse> body = ApiResponse.ok(
+                data,
+                "REGISTRATION_UPDATED",
+                "Registration updated",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
     @GetMapping("/{regattaId}/registrations")
     public ResponseEntity<ApiResponse<List<RegistrationResponse>>> findRegistrations(
             @PathVariable Long regattaId,

@@ -47,6 +47,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
+    @ExceptionHandler(DuplicateOrganisationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateOrganisation(DuplicateOrganisationException ex,
+                                                                         HttpServletRequest request) {
+        logException(request, ex);
+        ApiResponse<Void> body = ApiResponse.error("DUPLICATE_ORGANISATION", ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(DuplicateSailNumberException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateSailNumber(DuplicateSailNumberException ex,
+                                                                       HttpServletRequest request) {
+        logException(request, ex);
+        ApiResponse<Void> body = ApiResponse.error("DUPLICATE_SAIL_NUMBER", ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<ApiResponse<Void>> handleTokenExpired(TokenExpiredException ex,
                                                                 HttpServletRequest request) {

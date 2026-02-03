@@ -6,7 +6,7 @@ import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.repository.OrganisationRepository;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.internal.UserInternalApi;
-import com.fleetscore.common.exception.DuplicateResourceException;
+import com.fleetscore.common.exception.DuplicateOrganisationException;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,7 +37,7 @@ public class OrganisationService {
     @Transactional
     public OrganisationResponse createOrganisation(UserAccount creator, CreateOrganisationRequest request) {
         if (organisationRepository.existsByName(request.name())) {
-            throw new DuplicateResourceException("Organisation", "name", request.name());
+            throw new DuplicateOrganisationException(request.name());
         }
 
         Organisation organisation = new Organisation();
@@ -56,7 +56,7 @@ public class OrganisationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
 
         if (!organisation.getName().equalsIgnoreCase(request.name()) && organisationRepository.existsByName(request.name())) {
-            throw new DuplicateResourceException("Organisation", "name", request.name());
+            throw new DuplicateOrganisationException(request.name());
         }
 
         applyRequest(organisation, request);

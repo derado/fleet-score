@@ -32,6 +32,7 @@
     { "key": "clubId", "value": "" },
     { "key": "clubAdminUserId", "value": "" },
     { "key": "regattaId", "value": "" },
+    { "key": "registrationId", "value": "" },
     { "key": "regattaAdminUserId", "value": "" },
     { "key": "sailingClassId", "value": "" },
     { "key": "sailingNationId", "value": "" },
@@ -817,8 +818,35 @@
               "raw": "{\n  \"sailorName\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"gender\": \"M\",\n  \"sailingClubName\": \"Local Sailing Club\",\n  \"sailingClubId\": null,\n  \"sailorId\": null,\n  \"sailingClassId\": 1,\n  \"sailingNationId\": 1,\n  \"sailNumber\": 123\n}"
             }
           },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create registration returns 201', function () { pm.response.to.have.status(201); });",
+                  "var j = pm.response.json(); if (j && j.data && j.data.id) { pm.collectionVariables.set('registrationId', j.data.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Registration",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Api-Version", "value": "{{apiVersion}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/regattas/{{regattaId}}/registrations/{{registrationId}}", "host": ["{{baseUrl}}"], "path": ["api","regattas","{{regattaId}}","registrations","{{registrationId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sailorName\": \"John Doe Updated\",\n  \"email\": \"john.doe@example.com\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"gender\": \"M\",\n  \"sailingClubName\": \"Updated Sailing Club\",\n  \"sailingClubId\": null,\n  \"sailorId\": null,\n  \"sailingClassId\": 1,\n  \"sailingNationId\": 1,\n  \"sailNumber\": 456\n}"
+            }
+          },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('Create registration returns 201', function () { pm.response.to.have.status(201); });"
+            "pm.test('Update registration returns 200', function () { pm.response.to.have.status(200); });"
           ] } } ]
         },
         {
