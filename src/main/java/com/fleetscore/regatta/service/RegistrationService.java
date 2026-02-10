@@ -14,7 +14,6 @@ import com.fleetscore.regatta.domain.Registration;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegistrationRepository;
 import com.fleetscore.sailor.domain.Sailor;
-import com.fleetscore.sailor.internal.SailorInternalApi;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import com.fleetscore.sailingnation.domain.SailingNation;
@@ -31,7 +30,7 @@ public class RegistrationService {
     private final SailingClassInternalApi sailingClassApi;
     private final SailingNationInternalApi sailingNationApi;
     private final ClubInternalApi clubApi;
-    private final SailorInternalApi sailorApi;
+    private final SailorResolver sailorResolver;
 
     @Transactional
     public RegistrationResponse createRegistration(Long regattaId, CreateRegistrationRequest request, UserAccount currentUser) {
@@ -56,7 +55,13 @@ public class RegistrationService {
             sailingClub = clubApi.findById(request.sailingClubId());
         }
 
-        Sailor sailor = findOrCreateSailor(request);
+        Sailor sailor = sailorResolver.findOrCreate(
+                request.sailorId(),
+                request.email(),
+                request.sailorName(),
+                request.dateOfBirth(),
+                request.gender()
+        );
 
         Registration registration = new Registration();
         registration.setRegatta(regatta);
@@ -74,21 +79,6 @@ public class RegistrationService {
 
         Registration saved = registrationRepository.save(registration);
         return toResponse(saved);
-    }
-
-    private Sailor findOrCreateSailor(CreateRegistrationRequest request) {
-        if (request.sailorId() != null) {
-            return sailorApi.findById(request.sailorId());
-        }
-
-        return sailorApi.findByEmail(request.email())
-                .or(() -> sailorApi.findByNameAndDateOfBirth(request.sailorName(), request.dateOfBirth()))
-                .orElseGet(() -> sailorApi.createSailor(
-                        request.sailorName(),
-                        request.email(),
-                        request.dateOfBirth(),
-                        request.gender()
-                ));
     }
 
     @Transactional

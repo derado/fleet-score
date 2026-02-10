@@ -12,6 +12,7 @@ import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaAuthorizationService;
 import com.fleetscore.regatta.service.RegattaService;
 import com.fleetscore.regatta.service.RegistrationService;
+import com.fleetscore.regatta.service.SailorResolver;
 import com.fleetscore.regatta.service.ScoringService;
 import com.fleetscore.sailor.internal.SailorInternalApi;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
@@ -44,14 +45,19 @@ public class RegattaConfig {
     }
 
     @Bean
+    SailorResolver sailorResolver(SailorInternalApi sailorApi) {
+        return new SailorResolver(sailorApi);
+    }
+
+    @Bean
     RegistrationService registrationService(
             RegistrationRepository registrationRepository,
             RegattaRepository regattaRepository,
             SailingClassInternalApi sailingClassApi,
             SailingNationInternalApi sailingNationApi,
             ClubInternalApi clubApi,
-            SailorInternalApi sailorApi) {
-        return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi, sailorApi);
+            SailorResolver sailorResolver) {
+        return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi, sailorResolver);
     }
 
     @Bean
@@ -74,9 +80,8 @@ public class RegattaConfig {
             RegattaRepository regattaRepository,
             RaceRepository raceRepository,
             RaceResultRepository raceResultRepository,
-            RegistrationRepository registrationRepository,
             SailingClassInternalApi sailingClassApi,
             LowPointScoringCalculator scoringCalculator) {
-        return new ScoringService(regattaRepository, raceRepository, raceResultRepository, registrationRepository, sailingClassApi, scoringCalculator);
+        return new ScoringService(regattaRepository, raceRepository, raceResultRepository, sailingClassApi, scoringCalculator);
     }
 }
