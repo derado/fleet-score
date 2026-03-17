@@ -14,13 +14,16 @@ import com.fleetscore.regatta.api.dto.TransferRegattaOwnerRequest;
 import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaService;
+import com.fleetscore.regatta.service.RegistrationPdfExporter;
 import com.fleetscore.regatta.service.RegistrationService;
 import com.fleetscore.regatta.service.ScoringService;
 import com.fleetscore.user.domain.UserAccount;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,6 +51,7 @@ public class RegattaController {
 
     private final RegattaService regattaService;
     private final RegistrationService registrationService;
+    private final RegistrationPdfExporter registrationPdfExporter;
     private final RaceService raceService;
     private final ScoringService scoringService;
 
@@ -232,6 +236,29 @@ public class RegattaController {
                 httpRequest.getRequestURI()
         );
         return ResponseEntity.ok(body);
+    }
+
+    @GetMapping(value = "/{regattaId}/registrations/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> exportRegistrationsPdf(
+            @PathVariable Long regattaId,
+            @RequestParam(required = false) Long sailingClassId,
+            @RequestParam(required = false) Long sailingNationId,
+            @RequestParam(required = false) String sailorName,
+            @RequestParam(required = false) String sailingClubName,
+            @RequestParam(required = false) Integer sailNumber,
+            @RequestParam(required = false) Gender gender
+    ) {
+        RegattaResponse regatta = regattaService.findRegattaById(regattaId);
+        List<RegistrationResponse> data = registrationService.findRegistrationsByRegatta(
+                regattaId, sailingClassId, sailingNationId, sailorName, sailingClubName, sailNumber, gender);
+        boolean groupBySailingClass = sailingClassId == null;
+        byte[] pdf = registrationPdfExporter.exportRegistrations(regatta, data, groupBySailingClass);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"registrations - " + regatta.name() + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     @PostMapping("/{regattaId}/races")

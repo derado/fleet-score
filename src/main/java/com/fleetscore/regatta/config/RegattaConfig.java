@@ -11,6 +11,7 @@ import com.fleetscore.regatta.scoring.LowPointScoringCalculator;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaAuthorizationService;
 import com.fleetscore.regatta.service.RegattaService;
+import com.fleetscore.regatta.service.RegistrationPdfExporter;
 import com.fleetscore.regatta.service.RegistrationService;
 import com.fleetscore.regatta.service.SailorResolver;
 import com.fleetscore.regatta.service.ScoringService;
@@ -58,6 +59,11 @@ public class RegattaConfig {
             ClubInternalApi clubApi,
             SailorResolver sailorResolver) {
         return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi, sailorResolver);
+    }
+
+    @Bean
+    RegistrationPdfExporter registrationPdfExporter() {
+        return new RegistrationPdfExporter();
     }
 
     @Bean
