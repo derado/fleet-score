@@ -9,8 +9,10 @@ import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
 import com.fleetscore.regatta.domain.Regatta;
+import com.fleetscore.regatta.repository.RaceRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegattaSpecification;
+import com.fleetscore.regatta.repository.RegistrationRepository;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import com.fleetscore.user.domain.UserAccount;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 public class RegattaService {
 
     private final RegattaRepository regattaRepository;
+    private final RegistrationRepository registrationRepository;
+    private final RaceRepository raceRepository;
     private final SailingClassInternalApi sailingClassApi;
     private final ClubInternalApi clubApi;
     private final OrganisationInternalApi organisationApi;
@@ -109,6 +113,19 @@ public class RegattaService {
         UserAccount newOwner = userApi.findById(newOwnerUserId);
         regatta.setOwner(newOwner);
         return toResponse(regatta);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated() and @regattaAuthz.isOwner(principal?.id, #regattaId)")
+    public void deleteRegatta(Long regattaId) {
+        Regatta regatta = regattaRepository.findById(regattaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Regatta not found"));
+
+        if (registrationRepository.existsByRegattaId(regattaId) || raceRepository.existsByRegattaId(regattaId)) {
+            throw new IllegalStateException("Cannot delete regatta that has registrations or races");
+        }
+
+        regattaRepository.delete(regatta);
     }
 
     private void applyRequest(Regatta regatta, RegattaRequest request) {

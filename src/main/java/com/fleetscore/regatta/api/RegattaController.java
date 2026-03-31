@@ -145,6 +145,22 @@ public class RegattaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
+    @DeleteMapping("/{regattaId}")
+    public ResponseEntity<ApiResponse<Void>> deleteRegatta(
+            @PathVariable Long regattaId,
+            HttpServletRequest httpRequest
+    ) {
+        regattaService.deleteRegatta(regattaId);
+        ApiResponse<Void> body = ApiResponse.ok(
+                null,
+                "REGATTA_DELETED",
+                "Regatta deleted",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
     @PutMapping("/{regattaId}")
     public ResponseEntity<ApiResponse<RegattaResponse>> updateRegatta(
             @PathVariable Long regattaId,

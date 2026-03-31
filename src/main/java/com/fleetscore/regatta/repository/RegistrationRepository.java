@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
+    boolean existsByRegattaId(Long regattaId);
+
     boolean existsByRegattaIdAndSailNumberAndSailingClassId(Long regattaId, Integer sailNumber, Long sailingClassId);
 
     boolean existsByRegattaIdAndSailNumberAndSailingClassIdAndIdNot(Long regattaId, Integer sailNumber, Long sailingClassId, Long id);

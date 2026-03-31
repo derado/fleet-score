@@ -38,11 +38,13 @@ public class RegattaConfig {
     @Bean
     RegattaService regattaService(
             RegattaRepository regattaRepository,
+            RegistrationRepository registrationRepository,
+            RaceRepository raceRepository,
             SailingClassInternalApi sailingClassApi,
             ClubInternalApi clubApi,
             OrganisationInternalApi organisationApi,
             UserInternalApi userApi) {
-        return new RegattaService(regattaRepository, sailingClassApi, clubApi, organisationApi, userApi);
+        return new RegattaService(regattaRepository, registrationRepository, raceRepository, sailingClassApi, clubApi, organisationApi, userApi);
     }
 
     @Bean

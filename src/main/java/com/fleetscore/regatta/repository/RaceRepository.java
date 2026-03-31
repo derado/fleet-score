@@ -30,5 +30,7 @@ public interface RaceRepository extends JpaRepository<Race, Long> {
            "WHERE r.id = :raceId")
     Optional<Race> findByIdWithSailingClass(@Param("raceId") Long raceId);
 
+    boolean existsByRegattaId(Long regattaId);
+
     boolean existsByRegattaIdAndRaceNumberAndSailingClassId(Long regattaId, Integer raceNumber, Long sailingClassId);
 }
