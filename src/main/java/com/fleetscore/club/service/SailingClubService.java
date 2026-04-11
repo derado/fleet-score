@@ -1,7 +1,9 @@
 package com.fleetscore.club.service;
 
 import com.fleetscore.club.api.dto.CreateSailingClubRequest;
+import com.fleetscore.club.api.dto.SailingClubFilter;
 import com.fleetscore.club.api.dto.SailingClubResponse;
+import com.fleetscore.club.repository.SailingClubSpecification;
 import com.fleetscore.club.domain.SailingClub;
 import com.fleetscore.club.repository.SailingClubRepository;
 import com.fleetscore.organisation.domain.Organisation;
@@ -27,8 +29,8 @@ public class SailingClubService {
     private final SailingNationInternalApi sailingNationApi;
 
     @Transactional(readOnly = true)
-    public List<SailingClubResponse> findAllClubs() {
-        return sailingClubRepository.findAll().stream()
+    public List<SailingClubResponse> findAllClubs(SailingClubFilter filter) {
+        return sailingClubRepository.findAll(SailingClubSpecification.withFilter(filter)).stream()
                 .map(this::toResponse)
                 .toList();
     }

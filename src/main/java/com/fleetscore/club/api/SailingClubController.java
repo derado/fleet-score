@@ -2,6 +2,7 @@ package com.fleetscore.club.api;
 
 import com.fleetscore.club.api.dto.CreateSailingClubRequest;
 import com.fleetscore.club.api.dto.PromoteClubAdminRequest;
+import com.fleetscore.club.api.dto.SailingClubFilter;
 import com.fleetscore.club.api.dto.SailingClubResponse;
 import com.fleetscore.club.api.dto.TransferClubOwnerRequest;
 import com.fleetscore.club.service.SailingClubService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,8 +37,13 @@ public class SailingClubController {
     private final SailingClubService sailingClubService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SailingClubResponse>>> findAllClubs(HttpServletRequest httpRequest) {
-        List<SailingClubResponse> data = sailingClubService.findAllClubs();
+    public ResponseEntity<ApiResponse<List<SailingClubResponse>>> findAllClubs(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long sailingNationId,
+            HttpServletRequest httpRequest
+    ) {
+        SailingClubFilter filter = new SailingClubFilter(name, sailingNationId);
+        List<SailingClubResponse> data = sailingClubService.findAllClubs(filter);
         ApiResponse<List<SailingClubResponse>> body = ApiResponse.ok(
                 data,
                 "CLUBS_RETRIEVED",

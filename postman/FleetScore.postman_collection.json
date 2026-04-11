@@ -417,7 +417,15 @@
           "request": {
             "method": "GET",
             "header": [ { "key": "Api-Version", "value": "{{apiVersion}}" } ],
-            "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/clubs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","clubs"],
+              "query": [
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "sailingNationId", "value": "", "disabled": true }
+              ]
+            }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
             "pm.test('List clubs returns 200', function () { pm.response.to.have.status(200); });"
