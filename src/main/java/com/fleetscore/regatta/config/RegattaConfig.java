@@ -26,8 +26,8 @@ import org.springframework.context.annotation.Configuration;
 public class RegattaConfig {
 
     @Bean
-    RegattaInternalApi regattaInternalApi(RegattaRepository regattaRepository) {
-        return new RegattaInternalApi(regattaRepository);
+    RegattaInternalApi regattaInternalApi(RegattaRepository regattaRepository, RegistrationRepository registrationRepository) {
+        return new RegattaInternalApi(regattaRepository, registrationRepository);
     }
 
     @Bean("regattaAuthz")

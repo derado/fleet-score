@@ -2,6 +2,7 @@ package com.fleetscore.regatta.repository;
 
 import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.domain.Registration;
+import com.fleetscore.sailor.domain.Sailor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
+
+    @Query("SELECT DISTINCT r.sailor FROM Registration r WHERE r.user.id = :userId AND r.sailor IS NOT NULL")
+    List<Sailor> findDistinctSailorsByUserId(@Param("userId") Long userId);
 
     boolean existsByRegattaId(Long regattaId);
 
