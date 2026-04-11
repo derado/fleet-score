@@ -6,6 +6,8 @@ import com.fleetscore.club.domain.SailingClub;
 import com.fleetscore.club.repository.SailingClubRepository;
 import com.fleetscore.organisation.domain.Organisation;
 import com.fleetscore.organisation.internal.OrganisationInternalApi;
+import com.fleetscore.sailingnation.domain.SailingNation;
+import com.fleetscore.sailingnation.internal.SailingNationInternalApi;
 import com.fleetscore.user.domain.UserAccount;
 import com.fleetscore.user.internal.UserInternalApi;
 import com.fleetscore.common.exception.ResourceNotFoundException;
@@ -22,6 +24,7 @@ public class SailingClubService {
     private final SailingClubRepository sailingClubRepository;
     private final OrganisationInternalApi organisationApi;
     private final UserInternalApi userApi;
+    private final SailingNationInternalApi sailingNationApi;
 
     @Transactional(readOnly = true)
     public List<SailingClubResponse> findAllClubs() {
@@ -81,8 +84,11 @@ public class SailingClubService {
     }
 
     private void applyRequest(SailingClub club, CreateSailingClubRequest request) {
+        SailingNation sailingNation = request.sailingNationId() != null
+                ? sailingNationApi.findById(request.sailingNationId())
+                : null;
         club.setName(request.name());
-        club.setCountry(request.country());
+        club.setSailingNation(sailingNation);
         club.setPlace(request.place());
         club.setPostCode(request.postCode());
         club.setAddress(request.address());
@@ -155,10 +161,15 @@ public class SailingClubService {
     private SailingClubResponse toResponse(SailingClub club) {
         Long orgId = club.getOrganisation() != null ? club.getOrganisation().getId() : null;
         String orgName = club.getOrganisation() != null ? club.getOrganisation().getName() : null;
+        Long sailingNationId = club.getSailingNation() != null ? club.getSailingNation().getId() : null;
+        String sailingNationCode = club.getSailingNation() != null ? club.getSailingNation().getCode() : null;
+        String sailingNationCountry = club.getSailingNation() != null ? club.getSailingNation().getCountry() : null;
         return new SailingClubResponse(
                 club.getId(),
                 club.getName(),
-                club.getCountry(),
+                sailingNationId,
+                sailingNationCode,
+                sailingNationCountry,
                 club.getPlace(),
                 club.getPostCode(),
                 club.getAddress(),

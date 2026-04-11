@@ -446,7 +446,7 @@
             "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"country\": \"Croatia\",\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 1\",\n  \"email\": \"club@example.com\",\n  \"phone\": \"+385 21 654321\"\n}"
+              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"sailingNationId\": {{sailingNationId}},\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 1\",\n  \"email\": \"club@example.com\",\n  \"phone\": \"+385 21 654321\"\n}"
             }
           },
           "event": [
@@ -473,7 +473,7 @@
             "url": { "raw": "{{baseUrl}}/api/clubs", "host": ["{{baseUrl}}"], "path": ["api","clubs"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"country\": \"Croatia\",\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 1\",\n  \"email\": \"club@example.com\",\n  \"phone\": \"+385 21 654321\",\n  \"organisationId\": {{organisationId}}\n}"
+              "raw": "{\n  \"name\": \"{{clubName}}\",\n  \"sailingNationId\": {{sailingNationId}},\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 1\",\n  \"email\": \"club@example.com\",\n  \"phone\": \"+385 21 654321\",\n  \"organisationId\": {{organisationId}}\n}"
             }
           },
           "event": [
@@ -500,7 +500,7 @@
             "url": { "raw": "{{baseUrl}}/api/clubs/{{clubId}}", "host": ["{{baseUrl}}"], "path": ["api","clubs","{{clubId}}"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{clubName}} - Updated\",\n  \"country\": \"Croatia\",\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 2\",\n  \"email\": \"club-updated@example.com\",\n  \"phone\": \"+385 21 654322\"\n}"
+              "raw": "{\n  \"name\": \"{{clubName}} - Updated\",\n  \"sailingNationId\": {{sailingNationId}},\n  \"place\": \"{{clubPlace}}\",\n  \"postCode\": \"21000\",\n  \"address\": \"Marina 2\",\n  \"email\": \"club-updated@example.com\",\n  \"phone\": \"+385 21 654322\"\n}"
             }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [

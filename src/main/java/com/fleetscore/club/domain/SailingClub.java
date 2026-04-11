@@ -2,6 +2,7 @@ package com.fleetscore.club.domain;
 
 import com.fleetscore.common.persistence.AuditableEntity;
 import com.fleetscore.organisation.domain.Organisation;
+import com.fleetscore.sailingnation.domain.SailingNation;
 import com.fleetscore.user.domain.UserAccount;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,8 +36,9 @@ public class SailingClub extends AuditableEntity {
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(length = 100)
-    private String country;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sailing_nation_id")
+    private SailingNation sailingNation;
 
     @Column(length = 100)
     private String place;

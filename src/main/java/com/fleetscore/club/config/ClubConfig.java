@@ -5,6 +5,7 @@ import com.fleetscore.club.repository.SailingClubRepository;
 import com.fleetscore.club.service.ClubAuthorizationService;
 import com.fleetscore.club.service.SailingClubService;
 import com.fleetscore.organisation.internal.OrganisationInternalApi;
+import com.fleetscore.sailingnation.internal.SailingNationInternalApi;
 import com.fleetscore.user.internal.UserInternalApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,8 @@ public class ClubConfig {
     SailingClubService sailingClubService(
             SailingClubRepository sailingClubRepository,
             OrganisationInternalApi organisationApi,
-            UserInternalApi userApi) {
-        return new SailingClubService(sailingClubRepository, organisationApi, userApi);
+            UserInternalApi userApi,
+            SailingNationInternalApi sailingNationApi) {
+        return new SailingClubService(sailingClubRepository, organisationApi, userApi, sailingNationApi);
     }
 }

@@ -2,14 +2,15 @@ package com.fleetscore.club.api.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record CreateSailingClubRequest(
         @NotBlank(message = "Club name is required")
         @Size(max = 200, message = "Club name must not exceed 200 characters")
         String name,
-        @Size(max = 100, message = "Country must not exceed 100 characters")
-        String country,
+        @NotNull(message = "Sailing nation is required")
+        Long sailingNationId,
         @Size(max = 100, message = "Place must not exceed 100 characters")
         String place,
         @Size(max = 20, message = "Post code must not exceed 20 characters")
