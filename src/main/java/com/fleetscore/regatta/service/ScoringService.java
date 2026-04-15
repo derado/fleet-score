@@ -10,7 +10,6 @@ import com.fleetscore.regatta.domain.Registration;
 import com.fleetscore.regatta.repository.RaceRepository;
 import com.fleetscore.regatta.repository.RaceResultRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
-import com.fleetscore.regatta.repository.RegistrationRepository;
 import com.fleetscore.regatta.scoring.LowPointScoringCalculator;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;

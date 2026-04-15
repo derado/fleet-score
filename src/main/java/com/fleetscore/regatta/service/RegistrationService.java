@@ -51,8 +51,10 @@ public class RegistrationService {
         }
 
         SailingClub sailingClub = null;
+        String sailingClubName = request.sailingClubName();
         if (request.sailingClubId() != null) {
             sailingClub = clubApi.findById(request.sailingClubId());
+            sailingClubName = sailingClub.getName();
         }
 
         Sailor sailor = sailorResolver.findOrCreate(
@@ -70,7 +72,7 @@ public class RegistrationService {
         registration.setDateOfBirth(request.dateOfBirth());
         registration.setGender(request.gender());
         registration.setSailor(sailor);
-        registration.setSailingClubName(request.sailingClubName());
+        registration.setSailingClubName(sailingClubName);
         registration.setSailingClub(sailingClub);
         registration.setUser(currentUser);
         registration.setSailingClass(sailingClass);
