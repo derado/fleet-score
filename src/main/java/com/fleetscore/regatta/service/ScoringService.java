@@ -140,6 +140,6 @@ public class ScoringService {
         if (circumstance == null) {
             return false;
         }
-        return circumstance == Circumstance.DNE || circumstance == Circumstance.DPI;
+        return circumstance == Circumstance.DNE;
     }
 }
