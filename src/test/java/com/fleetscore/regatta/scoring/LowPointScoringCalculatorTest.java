@@ -186,27 +186,163 @@ class LowPointScoringCalculatorTest {
     }
 
     @Test
-    void calculateScores_tieBreaker_usesTotalPointsForRanking() {
+    void tiebreaker_a8_1_mostFirstsInNonExcludedRaces_breaksNetPointsTie() {
+        // Both sailors have net = 5. numberOfStarters = 2, so score 3 is a penalty (> 2).
+        // reg=1 has two first places; reg=2 has one. reg=1 wins under A8.1 step 2a.
+        List<LowPointScoringCalculator.RaceResultInput> results = List.of(
+                new LowPointScoringCalculator.RaceResultInput(1L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 102L, 2, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 103L, 3, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 102L, 2, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 103L, 3, 2, false)
+        );
+
+        List<LowPointScoringCalculator.SailorScore> scores = calculator.calculateScores(results, 0, 0);
+
+        LowPointScoringCalculator.SailorScore sailor1 = scores.stream()
+                .filter(s -> s.registrationId().equals(1L))
+                .findFirst().orElseThrow();
+        LowPointScoringCalculator.SailorScore sailor2 = scores.stream()
+                .filter(s -> s.registrationId().equals(2L))
+                .findFirst().orElseThrow();
+
+        assertThat(sailor1.netPoints()).isEqualTo(5);
+        assertThat(sailor2.netPoints()).isEqualTo(5);
+        assertThat(sailor1.rank()).isEqualTo(1);
+        assertThat(sailor2.rank()).isEqualTo(2);
+    }
+
+    @Test
+    void tiebreaker_a8_1_mostSecondsInNonExcludedRaces_breaksWhenFirstsEqual() {
+        // 4 sailors to get numberOfStarters = 4. Scores 9 and 10 are penalties (> 4).
+        // reg=1: firsts=1, seconds=2; reg=2: firsts=1, seconds=1 — reg=1 wins by seconds.
+        List<LowPointScoringCalculator.RaceResultInput> results = List.of(
+                new LowPointScoringCalculator.RaceResultInput(1L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 102L, 2, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 103L, 3, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 104L, 4, 10, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 102L, 2, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 103L, 3, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 104L, 4, 9, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 101L, 1, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 102L, 2, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 103L, 3, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 104L, 4, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 101L, 1, 4, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 102L, 2, 4, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 103L, 3, 4, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 104L, 4, 4, false)
+        );
+
+        List<LowPointScoringCalculator.SailorScore> scores = calculator.calculateScores(results, 0, 0);
+
+        LowPointScoringCalculator.SailorScore sailor1 = scores.stream()
+                .filter(s -> s.registrationId().equals(1L))
+                .findFirst().orElseThrow();
+        LowPointScoringCalculator.SailorScore sailor2 = scores.stream()
+                .filter(s -> s.registrationId().equals(2L))
+                .findFirst().orElseThrow();
+
+        assertThat(sailor1.netPoints()).isEqualTo(15);
+        assertThat(sailor2.netPoints()).isEqualTo(15);
+        assertThat(sailor1.rank()).isEqualTo(2);
+        assertThat(sailor2.rank()).isEqualTo(3);
+    }
+
+    @Test
+    void tiebreaker_a8_2_lastRaceScoreBreaksTieWhenA8_1Tied() {
+        // 4 sailors, throwoutAfter=3 → 1 throwout. numberOfStarters = 4, valid places 1–4.
+        // reg=1: 1,2,3 excl=3 net=3 — A8.1 tied (non-excl sorted [1,2] == reg=2)
+        // reg=2: 2,1,4 excl=4 net=3 — A8.2: last race (race3) reg=1 scored 3, reg=2 scored 4 → reg=1 wins.
+        List<LowPointScoringCalculator.RaceResultInput> results = List.of(
+                new LowPointScoringCalculator.RaceResultInput(1L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 102L, 2, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 103L, 3, 3, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 101L, 1, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 102L, 2, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 103L, 3, 4, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 101L, 1, 5, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 102L, 2, 5, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 103L, 3, 5, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 101L, 1, 6, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 102L, 2, 6, false),
+                new LowPointScoringCalculator.RaceResultInput(4L, 103L, 3, 6, false)
+        );
+
+        List<LowPointScoringCalculator.SailorScore> scores = calculator.calculateScores(results, 3, 0);
+
+        LowPointScoringCalculator.SailorScore sailor1 = scores.stream()
+                .filter(s -> s.registrationId().equals(1L))
+                .findFirst().orElseThrow();
+        LowPointScoringCalculator.SailorScore sailor2 = scores.stream()
+                .filter(s -> s.registrationId().equals(2L))
+                .findFirst().orElseThrow();
+
+        assertThat(sailor1.netPoints()).isEqualTo(3);
+        assertThat(sailor2.netPoints()).isEqualTo(3);
+        assertThat(sailor1.rank()).isEqualTo(1);
+        assertThat(sailor2.rank()).isEqualTo(2);
+    }
+
+    @Test
+    void tiebreaker_a8_2_secondToLastRaceBreaksTieWhenLastRaceTied() {
+        // 2 sailors, throwoutAfter=3 → 1 throwout. numberOfStarters = 2.
+        // Both exclude race3 (score 5). Non-excl sorted scores are identical → A8.1 tied.
+        // A8.2: race3: both 5 → tied. race2: reg=1 scored 2, reg=2 scored 1 → reg=2 wins.
         List<LowPointScoringCalculator.RaceResultInput> results = List.of(
                 new LowPointScoringCalculator.RaceResultInput(1L, 101L, 1, 1, false),
                 new LowPointScoringCalculator.RaceResultInput(1L, 102L, 2, 2, false),
                 new LowPointScoringCalculator.RaceResultInput(1L, 103L, 3, 5, false),
                 new LowPointScoringCalculator.RaceResultInput(2L, 101L, 1, 2, false),
                 new LowPointScoringCalculator.RaceResultInput(2L, 102L, 2, 1, false),
-                new LowPointScoringCalculator.RaceResultInput(2L, 103L, 3, 3, false)
+                new LowPointScoringCalculator.RaceResultInput(2L, 103L, 3, 5, false)
         );
 
         List<LowPointScoringCalculator.SailorScore> scores = calculator.calculateScores(results, 3, 0);
 
-        LowPointScoringCalculator.SailorScore sailor1 = scores.get(0);
-        LowPointScoringCalculator.SailorScore sailor2 = scores.get(1);
+        LowPointScoringCalculator.SailorScore sailor1 = scores.stream()
+                .filter(s -> s.registrationId().equals(1L))
+                .findFirst().orElseThrow();
+        LowPointScoringCalculator.SailorScore sailor2 = scores.stream()
+                .filter(s -> s.registrationId().equals(2L))
+                .findFirst().orElseThrow();
 
         assertThat(sailor1.netPoints()).isEqualTo(3);
         assertThat(sailor2.netPoints()).isEqualTo(3);
+        assertThat(sailor2.rank()).isEqualTo(1);
+        assertThat(sailor1.rank()).isEqualTo(2);
+    }
 
-        assertThat(sailor1.totalPoints()).isLessThan(sailor2.totalPoints());
+    @Test
+    void tiebreaker_a8_1_unresolvableTie_sharedRankAssigned() {
+        // reg=1 and reg=2 have identical scores — completely unresolvable under A8.1.
+        // Both share rank 1. reg=3 (next best net) must receive rank 3, not rank 2.
+        List<LowPointScoringCalculator.RaceResultInput> results = List.of(
+                new LowPointScoringCalculator.RaceResultInput(1L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(1L, 102L, 2, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 101L, 1, 1, false),
+                new LowPointScoringCalculator.RaceResultInput(2L, 102L, 2, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 101L, 1, 2, false),
+                new LowPointScoringCalculator.RaceResultInput(3L, 102L, 2, 3, false)
+        );
+
+        List<LowPointScoringCalculator.SailorScore> scores = calculator.calculateScores(results, 0, 0);
+
+        LowPointScoringCalculator.SailorScore sailor1 = scores.stream()
+                .filter(s -> s.registrationId().equals(1L))
+                .findFirst().orElseThrow();
+        LowPointScoringCalculator.SailorScore sailor2 = scores.stream()
+                .filter(s -> s.registrationId().equals(2L))
+                .findFirst().orElseThrow();
+        LowPointScoringCalculator.SailorScore sailor3 = scores.stream()
+                .filter(s -> s.registrationId().equals(3L))
+                .findFirst().orElseThrow();
+
         assertThat(sailor1.rank()).isEqualTo(1);
-        assertThat(sailor2.rank()).isEqualTo(2);
+        assertThat(sailor2.rank()).isEqualTo(1);
+        assertThat(sailor3.rank()).isEqualTo(3);
     }
 
     @Test
