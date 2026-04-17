@@ -5,11 +5,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-@Component
 public class ControllerLoggingInterceptor implements HandlerInterceptor {
 
     private static final String START_TIME_ATTRIBUTE = "controllerStartTime";

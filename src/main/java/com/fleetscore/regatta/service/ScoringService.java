@@ -52,16 +52,18 @@ public class ScoringService {
         Map<Long, Map<Long, RaceResult>> resultsByRegistrationAndRace = new HashMap<>();
         Map<Long, Registration> registrationMap = new HashMap<>();
 
-        for (Race race : races) {
-            List<RaceResult> raceResults = raceResultRepository.findByRaceId(race.getId());
-            for (RaceResult result : raceResults) {
-                Registration reg = result.getRegistration();
-                registrationMap.putIfAbsent(reg.getId(), reg);
+        List<Long> raceIds = races.stream().map(Race::getId).toList();
+        List<RaceResult> allResults = raceIds.isEmpty()
+                ? List.of()
+                : raceResultRepository.findByRaceIdIn(raceIds);
 
-                resultsByRegistrationAndRace
-                        .computeIfAbsent(reg.getId(), k -> new HashMap<>())
-                        .put(race.getId(), result);
-            }
+        for (RaceResult result : allResults) {
+            Registration reg = result.getRegistration();
+            registrationMap.putIfAbsent(reg.getId(), reg);
+
+            resultsByRegistrationAndRace
+                    .computeIfAbsent(reg.getId(), k -> new HashMap<>())
+                    .put(result.getRace().getId(), result);
         }
 
         List<LowPointScoringCalculator.RaceResultInput> inputs = new ArrayList<>();
@@ -84,7 +86,7 @@ public class ScoringService {
         int appliedThrowouts = scoringCalculator.calculateThrowouts(races.size(), throwoutAfter, throwoutLimit);
 
         List<LowPointScoringCalculator.SailorScore> calculatedScores =
-                scoringCalculator.calculateScores(inputs, throwoutAfter, throwoutLimit);
+                scoringCalculator.calculateScoresWithPrecomputedThrowouts(inputs, appliedThrowouts);
 
         List<RegattaScoreResponse.SailorStanding> standings = new ArrayList<>();
         for (LowPointScoringCalculator.SailorScore score : calculatedScores) {
@@ -106,7 +108,7 @@ public class ScoringService {
                 ));
             }
 
-            Integer yearOfBirth = registration.getDateOfBirth() != null 
+            Integer yearOfBirth = registration.getDateOfBirth() != null
                     ? registration.getDateOfBirth().getYear() : null;
 
             standings.add(new RegattaScoreResponse.SailorStanding(

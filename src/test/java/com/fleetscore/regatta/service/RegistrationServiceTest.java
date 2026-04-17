@@ -13,6 +13,8 @@ import com.fleetscore.regatta.repository.RaceRepository;
 import com.fleetscore.regatta.repository.RaceResultRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegistrationRepository;
+import com.fleetscore.sailor.domain.Sailor;
+import com.fleetscore.sailor.repository.SailorRepository;
 import com.fleetscore.sailingclass.domain.HullType;
 import com.fleetscore.sailingclass.domain.SailingClass;
 import com.fleetscore.sailingclass.domain.WorldSailingStatus;
@@ -54,6 +56,7 @@ class RegistrationServiceTest {
     @Autowired SailingClassRepository sailingClassRepository;
     @Autowired SailingNationRepository sailingNationRepository;
     @Autowired UserAccountRepository userAccountRepository;
+    @Autowired SailorRepository sailorRepository;
     @Autowired PasswordEncoder passwordEncoder;
 
     private static final AtomicLong idSequence = new AtomicLong(80000L);
@@ -140,6 +143,36 @@ class RegistrationServiceTest {
         CreateRegistrationRequest updateRequest = buildUpdateRequest(110);
         assertThrows(AccessDeniedException.class,
                 () -> registrationService.updateRegistration(reg.getId(), updateRequest, stranger));
+    }
+
+    @Test
+    void updateRegistration_reResolvesSailor_whenEmailChanges() {
+        Registration reg = saveRegistration(120, owner);
+        String newEmail = "changed-sailor-" + idSequence.incrementAndGet() + "@example.com";
+        String newName = "Changed Sailor " + idSequence.get();
+        LocalDate newDob = LocalDate.of(1985, 3, 20);
+
+        CreateRegistrationRequest updateRequest = new CreateRegistrationRequest(
+                newName,
+                newEmail,
+                newDob,
+                Gender.M,
+                "Updated Club",
+                null,
+                null,
+                sailingClass.getId(),
+                sailingNation.getId(),
+                121
+        );
+
+        registrationService.updateRegistration(reg.getId(), updateRequest, owner);
+
+        Registration reloaded = registrationRepository.findById(reg.getId()).orElseThrow();
+        Sailor sailor = reloaded.getSailor();
+        assertThat(sailor).isNotNull();
+        assertThat(sailor.getEmail()).isEqualTo(newEmail);
+        assertThat(sailor.getName()).isEqualTo(newName);
+        assertThat(sailor.getDateOfBirth()).isEqualTo(newDob);
     }
 
     // --- deleteRegistration ---

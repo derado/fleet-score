@@ -5,7 +5,7 @@ import com.fleetscore.club.internal.ClubSummary;
 import com.fleetscore.club.internal.UserClubAssociation;
 import com.fleetscore.common.api.ApiResponse;
 import com.fleetscore.regatta.internal.RegattaInternalApi;
-import com.fleetscore.sailor.domain.Sailor;
+import com.fleetscore.regatta.internal.SailorSummary;
 import com.fleetscore.user.api.dto.MyClubResponse;
 import com.fleetscore.user.api.dto.MyClubsResponse;
 import com.fleetscore.user.api.dto.MySailorResponse;
@@ -104,13 +104,13 @@ public class ProfileController {
         return ResponseEntity.ok(body);
     }
 
-    private MySailorResponse toMySailorResponse(Sailor sailor) {
+    private MySailorResponse toMySailorResponse(SailorSummary sailor) {
         return new MySailorResponse(
-                sailor.getId(),
-                sailor.getName(),
-                sailor.getEmail(),
-                sailor.getDateOfBirth(),
-                sailor.getGender()
+                sailor.id(),
+                sailor.name(),
+                sailor.email(),
+                sailor.dateOfBirth(),
+                sailor.gender()
         );
     }
 

@@ -29,8 +29,10 @@ public class RegattaInternalApi {
     }
 
     @Transactional(readOnly = true)
-    public List<Sailor> findSailorsByUserId(Long userId) {
-        return registrationRepository.findDistinctSailorsByUserId(userId);
+    public List<SailorSummary> findSailorsByUserId(Long userId) {
+        return registrationRepository.findDistinctSailorsByUserId(userId).stream()
+                .map(RegattaInternalApi::toSailorSummary)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -41,5 +43,15 @@ public class RegattaInternalApi {
     @Transactional(readOnly = true)
     public List<String> findExternalClubNamesByUserId(Long userId) {
         return registrationRepository.findDistinctExternalClubNamesByUserId(userId);
+    }
+
+    private static SailorSummary toSailorSummary(Sailor sailor) {
+        return new SailorSummary(
+                sailor.getId(),
+                sailor.getName(),
+                sailor.getEmail(),
+                sailor.getDateOfBirth(),
+                sailor.getGender()
+        );
     }
 }

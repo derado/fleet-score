@@ -1,9 +1,11 @@
 package com.fleetscore.regatta.api.dto;
 
+import com.fleetscore.regatta.api.dto.validation.PositionOrCircumstance;
 import com.fleetscore.regatta.domain.Circumstance;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+@PositionOrCircumstance
 public record RaceResultRequest(
         @NotNull(message = "Registration ID is required")
         Long registrationId,

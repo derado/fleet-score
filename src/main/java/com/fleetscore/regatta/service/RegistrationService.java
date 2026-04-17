@@ -113,10 +113,19 @@ public class RegistrationService {
             sailingClub = clubApi.findById(request.sailingClubId());
         }
 
+        Sailor sailor = sailorResolver.findOrCreate(
+                request.sailorId(),
+                request.email(),
+                request.sailorName(),
+                request.dateOfBirth(),
+                request.gender()
+        );
+
         registration.setSailorName(request.sailorName());
         registration.setEmail(request.email());
         registration.setDateOfBirth(request.dateOfBirth());
         registration.setGender(request.gender());
+        registration.setSailor(sailor);
         registration.setSailingClubName(request.sailingClubName());
         registration.setSailingClub(sailingClub);
         registration.setSailingClass(sailingClass);

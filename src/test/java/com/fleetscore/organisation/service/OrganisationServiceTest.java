@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = FleetScoreApplication.class)
+@ActiveProfiles("test")
 @Transactional
 class OrganisationServiceTest {
 

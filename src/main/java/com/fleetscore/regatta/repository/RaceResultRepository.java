@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface RaceResultRepository extends JpaRepository<RaceResult, Long> {
@@ -16,6 +17,14 @@ public interface RaceResultRepository extends JpaRepository<RaceResult, Long> {
            "WHERE rr.race.id = :raceId " +
            "ORDER BY rr.points, rr.position")
     List<RaceResult> findByRaceId(@Param("raceId") Long raceId);
+
+    @Query("SELECT rr FROM RaceResult rr " +
+           "JOIN FETCH rr.registration reg " +
+           "JOIN FETCH reg.sailingClass " +
+           "JOIN FETCH reg.sailingNation " +
+           "WHERE rr.race.id IN :raceIds " +
+           "ORDER BY rr.points, rr.position")
+    List<RaceResult> findByRaceIdIn(@Param("raceIds") Collection<Long> raceIds);
 
     @Query("SELECT COUNT(r) FROM Registration r " +
            "WHERE r.regatta.id = :regattaId " +

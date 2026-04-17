@@ -13,11 +13,14 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
 
 app:
+  cors:
+    allowed-origins: http://localhost:3000
   mail:
     enabled: false
   auth:
     jwt:
       issuer: fleetscore
+      secret: test-very-long-secret-key-for-tests-only-0123456789
       access-ttl-min: 15
       refresh-ttl-days: 7
     reset-ttl-min: 30

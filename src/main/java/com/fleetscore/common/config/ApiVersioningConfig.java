@@ -1,6 +1,7 @@
 package com.fleetscore.common.config;
 
 import com.fleetscore.common.logging.ControllerLoggingInterceptor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,6 +14,11 @@ public class ApiVersioningConfig implements WebMvcConfigurer {
 
     public ApiVersioningConfig(ControllerLoggingInterceptor controllerLoggingInterceptor) {
         this.controllerLoggingInterceptor = controllerLoggingInterceptor;
+    }
+
+    @Bean
+    static ControllerLoggingInterceptor controllerLoggingInterceptor() {
+        return new ControllerLoggingInterceptor();
     }
 
     @Override

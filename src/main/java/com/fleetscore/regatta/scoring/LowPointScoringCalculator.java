@@ -2,8 +2,10 @@ package com.fleetscore.regatta.scoring;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LowPointScoringCalculator {
@@ -55,17 +57,22 @@ public class LowPointScoringCalculator {
         return calculateScoresWithThrowouts(results, throwouts, numberOfStarters);
     }
 
+    public List<SailorScore> calculateScoresWithPrecomputedThrowouts(
+            List<RaceResultInput> results, int throwouts) {
+        int numberOfStarters = (int) results.stream()
+                .map(RaceResultInput::registrationId)
+                .distinct()
+                .count();
+        return calculateScoresWithThrowouts(results, throwouts, numberOfStarters);
+    }
+
     private List<SailorScore> calculateScoresWithThrowouts(List<RaceResultInput> results, int throwouts, int numberOfStarters) {
         Map<Long, List<RaceResultInput>> resultsByRegistration = results.stream()
                 .collect(Collectors.groupingBy(RaceResultInput::registrationId));
 
-        List<SailorScore> scores = new ArrayList<>();
-
-        for (Map.Entry<Long, List<RaceResultInput>> entry : resultsByRegistration.entrySet()) {
-            Long registrationId = entry.getKey();
-            List<RaceResultInput> sailorResults = entry.getValue();
-            scores.add(calculateSailorScore(registrationId, sailorResults, throwouts));
-        }
+        List<SailorScore> scores = resultsByRegistration.entrySet().stream()
+                .map(entry -> calculateSailorScore(entry.getKey(), entry.getValue(), throwouts))
+                .collect(Collectors.toCollection(ArrayList::new));
 
         Comparator<SailorScore> tieComparator = Comparator
                 .comparingInt(SailorScore::netPoints)
@@ -139,7 +146,7 @@ public class LowPointScoringCalculator {
                 .mapToInt(RaceResultInput::points)
                 .sum();
 
-        List<Integer> excludableIndices = findExcludableRaces(sortedResults, throwouts);
+        Set<Integer> excludableIndices = findExcludableRaces(sortedResults, throwouts);
 
         List<RaceScore> raceScores = new ArrayList<>();
         int netPoints = 0;
@@ -163,12 +170,12 @@ public class LowPointScoringCalculator {
         return new SailorScore(registrationId, 0, netPoints, totalPoints, raceScores);
     }
 
-    private List<Integer> findExcludableRaces(List<RaceResultInput> sortedResults, int throwouts) {
+    private Set<Integer> findExcludableRaces(List<RaceResultInput> sortedResults, int throwouts) {
         if (throwouts <= 0) {
-            return List.of();
+            return Set.of();
         }
 
-        List<Integer> excludableIndices = new ArrayList<>();
+        Set<Integer> excludableIndices = new HashSet<>();
 
         List<IndexedResult> indexedResults = new ArrayList<>();
         for (int i = 0; i < sortedResults.size(); i++) {
