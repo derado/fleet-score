@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class ScoringService {
@@ -30,6 +31,17 @@ public class ScoringService {
     private final RaceResultRepository raceResultRepository;
     private final SailingClassInternalApi sailingClassApi;
     private final LowPointScoringCalculator scoringCalculator;
+
+    @Transactional(readOnly = true)
+    public List<RegattaScoreResponse> calculateAllClassScores(Long regattaId) {
+        Regatta regatta = regattaRepository.findById(regattaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Regatta not found"));
+
+        Set<SailingClass> sailingClasses = regatta.getSailingClasses();
+        return sailingClasses.stream()
+                .map(sailingClass -> calculateScores(regattaId, sailingClass.getId()))
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public RegattaScoreResponse calculateScores(Long regattaId, Long sailingClassId) {

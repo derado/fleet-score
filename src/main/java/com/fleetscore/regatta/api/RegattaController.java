@@ -8,6 +8,7 @@ import com.fleetscore.regatta.api.dto.RaceResponse;
 import com.fleetscore.regatta.api.dto.RegattaFilter;
 import com.fleetscore.regatta.api.dto.RegattaRequest;
 import com.fleetscore.regatta.api.dto.RegattaResponse;
+import com.fleetscore.regatta.api.dto.RegattaAllScoresResponse;
 import com.fleetscore.regatta.api.dto.RegattaScoreResponse;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
 import com.fleetscore.regatta.api.dto.TransferRegattaOwnerRequest;
@@ -366,6 +367,22 @@ public class RegattaController {
                 data,
                 "RACE_UPDATED",
                 "Race updated",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/{regattaId}/scores")
+    public ResponseEntity<ApiResponse<RegattaAllScoresResponse>> findAllScores(
+            @PathVariable Long regattaId,
+            HttpServletRequest httpRequest
+    ) {
+        var classes = scoringService.calculateAllClassScores(regattaId);
+        ApiResponse<RegattaAllScoresResponse> body = ApiResponse.ok(
+                new RegattaAllScoresResponse(regattaId, classes),
+                "REGATTA_ALL_SCORES_RETRIEVED",
+                "Regatta scores retrieved",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );
