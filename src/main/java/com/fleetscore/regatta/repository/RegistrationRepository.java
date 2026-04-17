@@ -8,11 +8,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
     @Query("SELECT DISTINCT r.sailor FROM Registration r WHERE r.user.id = :userId AND r.sailor IS NOT NULL")
     List<Sailor> findDistinctSailorsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT r.sailingClub.id FROM Registration r WHERE r.user.id = :userId AND r.sailingClub IS NOT NULL")
+    Set<Long> findDistinctSailingClubIdsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT r.sailingClubName FROM Registration r " +
+           "WHERE r.user.id = :userId AND r.sailingClub IS NULL")
+    List<String> findDistinctExternalClubNamesByUserId(@Param("userId") Long userId);
 
     boolean existsByRegattaId(Long regattaId);
 

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class RegattaInternalApi {
@@ -30,5 +31,15 @@ public class RegattaInternalApi {
     @Transactional(readOnly = true)
     public List<Sailor> findSailorsByUserId(Long userId) {
         return registrationRepository.findDistinctSailorsByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> findClubIdsByRegistrantUserId(Long userId) {
+        return registrationRepository.findDistinctSailingClubIdsByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> findExternalClubNamesByUserId(Long userId) {
+        return registrationRepository.findDistinctExternalClubNamesByUserId(userId);
     }
 }
