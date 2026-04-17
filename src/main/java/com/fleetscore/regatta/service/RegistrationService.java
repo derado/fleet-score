@@ -5,12 +5,14 @@ import java.util.List;
 import com.fleetscore.club.domain.SailingClub;
 import com.fleetscore.club.internal.ClubInternalApi;
 import com.fleetscore.common.exception.DuplicateSailNumberException;
+import com.fleetscore.common.exception.RegistrationInUseException;
 import com.fleetscore.common.exception.ResourceNotFoundException;
 import com.fleetscore.regatta.api.dto.CreateRegistrationRequest;
 import com.fleetscore.regatta.api.dto.RegistrationResponse;
 import com.fleetscore.common.domain.Gender;
 import com.fleetscore.regatta.domain.Regatta;
 import com.fleetscore.regatta.domain.Registration;
+import com.fleetscore.regatta.repository.RaceResultRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegistrationRepository;
 import com.fleetscore.sailor.domain.Sailor;
@@ -20,6 +22,7 @@ import com.fleetscore.sailingnation.domain.SailingNation;
 import com.fleetscore.sailingnation.internal.SailingNationInternalApi;
 import com.fleetscore.user.domain.UserAccount;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ public class RegistrationService {
     private final SailingNationInternalApi sailingNationApi;
     private final ClubInternalApi clubApi;
     private final SailorResolver sailorResolver;
+    private final RegattaAuthorizationService regattaAuthz;
+    private final RaceResultRepository raceResultRepository;
 
     @Transactional
     public RegistrationResponse createRegistration(Long regattaId, CreateRegistrationRequest request, UserAccount currentUser) {
@@ -84,9 +89,11 @@ public class RegistrationService {
     }
 
     @Transactional
-    public RegistrationResponse updateRegistration(Long registrationId, CreateRegistrationRequest request) {
+    public RegistrationResponse updateRegistration(Long registrationId, CreateRegistrationRequest request, UserAccount currentUser) {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Registration not found"));
+
+        checkUpdateOrDeleteAuthorization(registration, currentUser);
 
         SailingClass sailingClass = sailingClassApi.findById(request.sailingClassId());
 
@@ -119,6 +126,20 @@ public class RegistrationService {
         return toResponse(registration);
     }
 
+    @Transactional
+    public void deleteRegistration(Long registrationId, UserAccount currentUser) {
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Registration not found"));
+
+        checkUpdateOrDeleteAuthorization(registration, currentUser);
+
+        if (raceResultRepository.existsByRegistrationId(registrationId)) {
+            throw new RegistrationInUseException();
+        }
+
+        registrationRepository.delete(registration);
+    }
+
     @Transactional(readOnly = true)
     public List<RegistrationResponse> findRegistrationsByRegatta(
             Long regattaId,
@@ -137,6 +158,16 @@ public class RegistrationService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    private void checkUpdateOrDeleteAuthorization(Registration registration, UserAccount currentUser) {
+        boolean isOwner = registration.getUser() != null
+                && registration.getUser().getId().equals(currentUser.getId());
+        boolean isRegattaAdmin = regattaAuthz.isAdmin(currentUser.getId(), registration.getRegatta().getId())
+                || regattaAuthz.isOwner(currentUser.getId(), registration.getRegatta().getId());
+        if (!isOwner && !isRegattaAdmin) {
+            throw new AccessDeniedException("Not authorised to update this registration");
+        }
     }
 
     private RegistrationResponse toResponse(Registration reg) {

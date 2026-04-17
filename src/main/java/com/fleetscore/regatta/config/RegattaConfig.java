@@ -59,8 +59,10 @@ public class RegattaConfig {
             SailingClassInternalApi sailingClassApi,
             SailingNationInternalApi sailingNationApi,
             ClubInternalApi clubApi,
-            SailorResolver sailorResolver) {
-        return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi, sailorResolver);
+            SailorResolver sailorResolver,
+            RegattaAuthorizationService regattaAuthz,
+            RaceResultRepository raceResultRepository) {
+        return new RegistrationService(registrationRepository, regattaRepository, sailingClassApi, sailingNationApi, clubApi, sailorResolver, regattaAuthz, raceResultRepository);
     }
 
     @Bean

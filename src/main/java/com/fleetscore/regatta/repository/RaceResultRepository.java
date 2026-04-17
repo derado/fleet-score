@@ -24,5 +24,7 @@ public interface RaceResultRepository extends JpaRepository<RaceResult, Long> {
             @Param("regattaId") Long regattaId,
             @Param("sailingClassId") Long sailingClassId);
 
+    boolean existsByRegistrationId(Long registrationId);
+
     void deleteByRaceId(Long raceId);
 }

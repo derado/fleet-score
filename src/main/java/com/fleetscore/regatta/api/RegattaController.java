@@ -78,6 +78,7 @@ public class RegattaController {
     }
 
     @DeleteMapping("/{regattaId}/admins/{adminUserId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RegattaResponse>> removeAdmin(
             @PathVariable Long regattaId,
             @PathVariable Long adminUserId,
@@ -95,6 +96,7 @@ public class RegattaController {
     }
 
     @PutMapping("/{regattaId}/owner")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RegattaResponse>> transferOwnership(
             @PathVariable Long regattaId,
             @Valid @RequestBody TransferRegattaOwnerRequest request,
@@ -146,6 +148,7 @@ public class RegattaController {
     }
 
     @DeleteMapping("/{regattaId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> deleteRegatta(
             @PathVariable Long regattaId,
             HttpServletRequest httpRequest
@@ -162,6 +165,7 @@ public class RegattaController {
     }
 
     @PutMapping("/{regattaId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RegattaResponse>> updateRegatta(
             @PathVariable Long regattaId,
             @Valid @RequestBody RegattaRequest request,
@@ -179,6 +183,7 @@ public class RegattaController {
     }
 
     @PutMapping("/{regattaId}/admins")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RegattaResponse>> promoteAdmin(
             @PathVariable Long regattaId,
             @Valid @RequestBody PromoteRegattaAdminRequest request,
@@ -214,17 +219,38 @@ public class RegattaController {
     }
 
     @PutMapping("/{regattaId}/registrations/{registrationId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RegistrationResponse>> updateRegistration(
+            @AuthenticationPrincipal UserAccount currentUser,
             @PathVariable Long regattaId,
             @PathVariable Long registrationId,
             @Valid @RequestBody CreateRegistrationRequest request,
             HttpServletRequest httpRequest
     ) {
-        RegistrationResponse data = registrationService.updateRegistration(registrationId, request);
+        RegistrationResponse data = registrationService.updateRegistration(registrationId, request, currentUser);
         ApiResponse<RegistrationResponse> body = ApiResponse.ok(
                 data,
                 "REGISTRATION_UPDATED",
                 "Registration updated",
+                HttpStatus.OK.value(),
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @DeleteMapping("/{regattaId}/registrations/{registrationId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> deleteRegistration(
+            @AuthenticationPrincipal UserAccount currentUser,
+            @PathVariable Long regattaId,
+            @PathVariable Long registrationId,
+            HttpServletRequest httpRequest
+    ) {
+        registrationService.deleteRegistration(registrationId, currentUser);
+        ApiResponse<Void> body = ApiResponse.ok(
+                null,
+                "REGISTRATION_DELETED",
+                "Registration deleted",
                 HttpStatus.OK.value(),
                 httpRequest.getRequestURI()
         );

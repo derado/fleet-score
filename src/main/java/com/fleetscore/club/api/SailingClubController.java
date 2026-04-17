@@ -125,6 +125,7 @@ public class SailingClubController {
     }
 
     @PutMapping("/{clubId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> updateClub(
             @PathVariable Long clubId,
             @Valid @RequestBody CreateSailingClubRequest request,
@@ -142,6 +143,7 @@ public class SailingClubController {
     }
 
     @PutMapping("/{clubId}/admins")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SailingClubResponse>> promoteAdmin(
             @PathVariable Long clubId,
             @Valid @RequestBody PromoteClubAdminRequest request,

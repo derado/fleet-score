@@ -136,6 +136,7 @@ public class OrganisationController {
     }
 
     @PutMapping("/{organisationId}/admins")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrganisationResponse>> promoteAdmin(
             @PathVariable Long organisationId,
             @Valid @RequestBody PromoteOrganisationAdminRequest request,

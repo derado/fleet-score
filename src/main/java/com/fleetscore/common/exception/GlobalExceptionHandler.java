@@ -63,6 +63,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
+    @ExceptionHandler(RegistrationInUseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRegistrationInUse(RegistrationInUseException ex,
+                                                                     HttpServletRequest request) {
+        logException(request, ex);
+        ApiResponse<Void> body = ApiResponse.error("REGISTRATION_IN_USE", ex.getMessage(), HttpStatus.CONFLICT.value(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<ApiResponse<Void>> handleTokenExpired(TokenExpiredException ex,
                                                                 HttpServletRequest request) {
