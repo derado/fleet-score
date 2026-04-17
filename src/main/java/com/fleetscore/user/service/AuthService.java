@@ -1,5 +1,6 @@
 package com.fleetscore.user.service;
 
+import com.fleetscore.user.config.AuthProperties;
 import com.fleetscore.user.security.TokenService;
 import com.fleetscore.user.api.dto.LoginRequest;
 import com.fleetscore.user.api.dto.TokenResponse;
@@ -13,7 +14,6 @@ import com.fleetscore.common.exception.TokenExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,21 +33,8 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokens;
     private final TokenService tokenService;
     private final TokenGenerator tokenGenerator;
-
-    @Value("${app.auth.jwt.refresh-ttl-days:7}")
-    private int refreshTtlDays;
-
-    @Value("${app.auth.refresh.cookie-name:refresh_token}")
-    private String cookieName;
-
-    @Value("${app.auth.refresh.cookie-secure:false}")
-    private boolean cookieSecure;
-
-    @Value("${app.auth.refresh.cookie-samesite:Lax}")
-    private String cookieSameSite;
-
-    @Value("${app.auth.refresh.cookie-domain:}")
-    private String cookieDomain;
+    private final AuthProperties.Jwt jwt;
+    private final AuthProperties.Refresh refreshProps;
 
     @Transactional
     public TokenResponse login(LoginRequest request, HttpServletResponse response) {
@@ -62,7 +49,7 @@ public class AuthService {
         Instant accessExp = tokenService.getExpiryFromNow();
 
         String rt = tokenGenerator.generateHexToken(48);
-        Instant rtExp = Instant.now().plus(refreshTtlDays, ChronoUnit.DAYS);
+        Instant rtExp = Instant.now().plus(jwt.refreshTtlDays(), ChronoUnit.DAYS);
         RefreshToken refresh = new RefreshToken();
         refresh.setToken(rt);
         refresh.setUser(user);
@@ -90,7 +77,7 @@ public class AuthService {
         token.setRevoked(true);
         refreshTokens.save(token);
         String newRt = tokenGenerator.generateHexToken(48);
-        Instant newRtExp = Instant.now().plus(refreshTtlDays, ChronoUnit.DAYS);
+        Instant newRtExp = Instant.now().plus(jwt.refreshTtlDays(), ChronoUnit.DAYS);
         RefreshToken newToken = new RefreshToken();
         newToken.setToken(newRt);
         newToken.setUser(user);
@@ -123,14 +110,14 @@ public class AuthService {
     }
 
     private void setRefreshCookie(HttpServletResponse response, String value, Instant exp, boolean delete) {
-        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName, value)
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(refreshProps.cookieName(), value)
                 .httpOnly(true)
-                .secure(cookieSecure)
+                .secure(refreshProps.cookieSecure())
                 .path("/")
-                .sameSite(cookieSameSite)
+                .sameSite(refreshProps.cookieSameSite())
                 .maxAge(delete ? 0 : exp.getEpochSecond() - Instant.now().getEpochSecond());
-        if (cookieDomain != null && !cookieDomain.isBlank()) {
-            builder.domain(cookieDomain);
+        if (refreshProps.cookieDomain() != null && !refreshProps.cookieDomain().isBlank()) {
+            builder.domain(refreshProps.cookieDomain());
         }
         response.addHeader(HttpHeaders.SET_COOKIE, builder.build().toString());
     }
@@ -138,7 +125,7 @@ public class AuthService {
     private String extractRefreshTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         return Arrays.stream(request.getCookies())
-                .filter(c -> cookieName.equals(c.getName()))
+                .filter(c -> refreshProps.cookieName().equals(c.getName()))
                 .map(jakarta.servlet.http.Cookie::getValue)
                 .findFirst().orElse(null);
     }

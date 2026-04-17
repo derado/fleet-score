@@ -55,6 +55,7 @@ app:
       secret: ${JWT_SECRET:dev-very-long-secret-key-please-change-0123456789}
       access-ttl-min: ${JWT_ACCESS_TTL_MIN:15}
       refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:7}
+    reset-ttl-min: ${RESET_TTL_MIN:30}
     refresh:
       cookie-name: ${REFRESH_COOKIE:refresh_token}
       cookie-secure: ${REFRESH_COOKIE_SECURE:false}

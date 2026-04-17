@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 import com.fleetscore.user.events.InvitationEmailRequested;
 import com.fleetscore.user.events.PasswordResetEmailRequested;
 import com.fleetscore.user.events.VerificationEmailRequested;
+import com.fleetscore.user.config.AuthProperties;
 import com.fleetscore.common.util.TokenGenerator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +33,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher events;
     private final TokenGenerator tokenGenerator;
-
-    
-
-    @Value("${app.auth.reset-ttl-min:30}")
-    private int resetTtlMinutes;
+    private final AuthProperties auth;
 
     @Transactional
     public String registerUser(RegistrationRequest req) {
@@ -141,7 +137,7 @@ public class UserService {
             PasswordResetToken prt = new PasswordResetToken();
             prt.setToken(token);
             prt.setUser(user);
-            prt.setExpiresAt(Instant.now().plus(resetTtlMinutes, ChronoUnit.MINUTES));
+            prt.setExpiresAt(Instant.now().plus(auth.resetTtlMin(), ChronoUnit.MINUTES));
             passwordResetTokenRepository.save(prt);
 
             events.publishEvent(new PasswordResetEmailRequested(user.getEmail(), token));

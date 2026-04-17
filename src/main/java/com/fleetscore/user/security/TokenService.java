@@ -1,6 +1,6 @@
 package com.fleetscore.user.security;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.fleetscore.user.config.AuthProperties;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -13,15 +13,13 @@ import java.time.temporal.ChronoUnit;
 public class TokenService {
 
     private final JwtEncoder encoder;
+    private final String issuer;
+    private final int accessTtlMinutes;
 
-    @Value("${app.auth.jwt.issuer:fleetscore}")
-    private String issuer;
-
-    @Value("${app.auth.jwt.access-ttl-min:15}")
-    private int accessTtlMinutes;
-
-    public TokenService(JwtEncoder encoder) {
+    public TokenService(JwtEncoder encoder, AuthProperties.Jwt jwt) {
         this.encoder = encoder;
+        this.issuer = jwt.issuer();
+        this.accessTtlMinutes = jwt.accessTtlMin();
     }
 
     public String generateAccessToken(String email, Long userId) {

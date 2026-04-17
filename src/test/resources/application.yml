@@ -15,3 +15,14 @@ spring:
 app:
   mail:
     enabled: false
+  auth:
+    jwt:
+      issuer: fleetscore
+      access-ttl-min: 15
+      refresh-ttl-days: 7
+    reset-ttl-min: 30
+    refresh:
+      cookie-name: refresh_token
+      cookie-secure: false
+      cookie-samesite: Lax
+      cookie-domain: ""

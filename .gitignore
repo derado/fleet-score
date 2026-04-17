@@ -34,3 +34,6 @@ build/
 
 # Internal rules for AI assistant (do not publish)
 AI-RULES.md
+CLAUDE.md
+.claude
+2025-2028-RRS.pdf
