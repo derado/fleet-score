@@ -58,7 +58,7 @@ public class ScoringService {
 
         List<RegattaScoreResponse.RaceInfo> raceInfos = races.stream()
                 .sorted(Comparator.comparingInt(Race::getRaceNumber))
-                .map(race -> new RegattaScoreResponse.RaceInfo(race.getId(), race.getRaceNumber()))
+                .map(race -> new RegattaScoreResponse.RaceInfo(race.getId(), race.getRaceNumber(), race.getRaceDate()))
                 .toList();
 
         Map<Long, Map<Long, RaceResult>> resultsByRegistrationAndRace = new HashMap<>();

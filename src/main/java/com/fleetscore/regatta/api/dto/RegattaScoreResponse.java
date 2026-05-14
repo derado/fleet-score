@@ -2,6 +2,7 @@ package com.fleetscore.regatta.api.dto;
 
 import com.fleetscore.regatta.domain.Circumstance;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record RegattaScoreResponse(
@@ -16,7 +17,8 @@ public record RegattaScoreResponse(
 ) {
     public record RaceInfo(
             Long raceId,
-            Integer raceNumber
+            Integer raceNumber,
+            LocalDate raceDate
     ) {}
 
     public record SailorStanding(
