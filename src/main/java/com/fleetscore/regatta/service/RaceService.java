@@ -190,6 +190,7 @@ public class RaceService {
         }
 
         raceResultRepository.deleteByRaceId(raceId);
+        raceResultRepository.flush();
 
         List<RaceResult> results = new ArrayList<>();
         for (RaceResultRequest resultRequest : request.results()) {
