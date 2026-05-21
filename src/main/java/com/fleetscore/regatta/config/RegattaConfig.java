@@ -7,7 +7,9 @@ import com.fleetscore.regatta.repository.RaceRepository;
 import com.fleetscore.regatta.repository.RaceResultRepository;
 import com.fleetscore.regatta.repository.RegattaRepository;
 import com.fleetscore.regatta.repository.RegistrationRepository;
+import com.fleetscore.regatta.repository.SeriesRepository;
 import com.fleetscore.regatta.scoring.LowPointScoringCalculator;
+import com.fleetscore.regatta.scoring.SeriesScoringCalculator;
 import com.fleetscore.regatta.service.RaceService;
 import com.fleetscore.regatta.service.RegattaAuthorizationService;
 import com.fleetscore.regatta.service.RegattaService;
@@ -15,6 +17,8 @@ import com.fleetscore.regatta.service.RegistrationPdfExporter;
 import com.fleetscore.regatta.service.RegistrationService;
 import com.fleetscore.regatta.service.SailorResolver;
 import com.fleetscore.regatta.service.ScoringService;
+import com.fleetscore.regatta.service.SeriesScoringService;
+import com.fleetscore.regatta.service.SeriesService;
 import com.fleetscore.sailor.internal.SailorInternalApi;
 import com.fleetscore.sailingclass.internal.SailingClassInternalApi;
 import com.fleetscore.sailingnation.internal.SailingNationInternalApi;
@@ -93,5 +97,28 @@ public class RegattaConfig {
             SailingClassInternalApi sailingClassApi,
             LowPointScoringCalculator scoringCalculator) {
         return new ScoringService(regattaRepository, raceRepository, raceResultRepository, sailingClassApi, scoringCalculator);
+    }
+
+    @Bean
+    SeriesService seriesService(SeriesRepository seriesRepository, RegattaRepository regattaRepository) {
+        return new SeriesService(seriesRepository, regattaRepository);
+    }
+
+    @Bean
+    SeriesScoringCalculator seriesScoringCalculator() {
+        return new SeriesScoringCalculator();
+    }
+
+    @Bean
+    SeriesScoringService seriesScoringService(
+            SeriesRepository seriesRepository,
+            ScoringService scoringService,
+            RegistrationRepository registrationRepository,
+            SeriesScoringCalculator seriesScoringCalculator,
+            RaceRepository raceRepository,
+            RaceResultRepository raceResultRepository,
+            LowPointScoringCalculator lowPointScoringCalculator) {
+        return new SeriesScoringService(seriesRepository, scoringService, registrationRepository,
+                seriesScoringCalculator, raceRepository, raceResultRepository, lowPointScoringCalculator);
     }
 }
